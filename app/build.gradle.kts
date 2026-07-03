@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":presentation"))
 
+    implementation(libs.androidx.core.splashscreen)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

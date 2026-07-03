@@ -1,4 +1,4 @@
-package com.greenbee.findme.ui.theme
+package com.greenbee.findme.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

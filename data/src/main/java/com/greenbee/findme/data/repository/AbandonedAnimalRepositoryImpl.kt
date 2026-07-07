@@ -29,6 +29,7 @@ class AbandonedAnimalRepositoryImpl @Inject constructor(
                 endDate = filter.endDate,
                 upKind = filter.upKind?.code,
                 sidoCode = filter.sidoCode,
+                sigunguCode = filter.sigunguCode,
                 state = filter.state?.apiValue,
             )
         }

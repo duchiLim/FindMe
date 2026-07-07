@@ -7,15 +7,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -32,8 +33,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.component.AnimalCard
-import com.greenbee.findme.presentation.home.component.HomeFilterChipsRow
-import com.greenbee.findme.presentation.home.component.HomeSidoFilterBottomSheet
+import com.greenbee.findme.presentation.home.component.HomeFilterBar
+import com.greenbee.findme.presentation.home.component.HomeRegionFilterBottomSheet
+import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +47,10 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
 
-    LaunchedEffect(gridState, uiState.canLoadMore, uiState.isLoading, uiState.isLoadingMore, uiState.animals.size) {
-        if (uiState.isLoading || uiState.animals.isEmpty() || !uiState.canLoadMore) return@LaunchedEffect
+    LaunchedEffect(gridState, uiState.canLoadMore, uiState.isLoading, uiState.isFilterLoading, uiState.isLoadingMore, uiState.animals.size) {
+        if (uiState.isLoading || uiState.isFilterLoading || uiState.animals.isEmpty() || !uiState.canLoadMore) {
+            return@LaunchedEffect
+        }
 
         snapshotFlow {
             val layoutInfo = gridState.layoutInfo
@@ -60,22 +64,37 @@ fun HomeScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        HomeFilterChipsRow(
-            selectedSido = uiState.selectedSido,
+        HomeFilterBar(
+            activeRegionFilterCount = uiState.activeRegionFilterCount,
             selectedUpKind = uiState.selectedUpKind,
             selectedState = uiState.selectedState,
-            onSidoFilterClick = viewModel::onSidoFilterClick,
-            onUpKindSelected = viewModel::onUpKindSelected,
+            onRegionFilterClick = viewModel::onRegionFilterClick,
+            onUpKindFilterClick = viewModel::onUpKindFilterClick,
             onStateSelected = viewModel::onStateSelected,
         )
 
-        HomeSidoFilterBottomSheet(
-            visible = uiState.isSidoFilterSheetVisible,
+        HomeRegionFilterBottomSheet(
+            visible = uiState.isRegionFilterSheetVisible,
             sidoList = uiState.sidoList,
-            selectedSido = uiState.selectedSido,
-            isLoading = uiState.isSidoListLoading,
-            onDismiss = viewModel::onSidoFilterDismiss,
-            onSidoSelected = viewModel::onSidoSelected,
+            sigunguList = uiState.sigunguList,
+            draftSido = uiState.draftSido,
+            draftSigungu = uiState.draftSigungu,
+            isSidoListLoading = uiState.isSidoListLoading,
+            isSigunguListLoading = uiState.isSigunguListLoading,
+            onDismiss = viewModel::onRegionFilterDismiss,
+            onDraftSidoSelected = viewModel::onDraftSidoSelected,
+            onDraftSigunguSelected = viewModel::onDraftSigunguSelected,
+            onReset = viewModel::onResetRegionDraft,
+            onApply = viewModel::onApplyRegionFilter,
+        )
+
+        HomeUpKindFilterBottomSheet(
+            visible = uiState.isUpKindFilterSheetVisible,
+            draftUpKind = uiState.draftUpKind,
+            onDismiss = viewModel::onUpKindFilterDismiss,
+            onDraftUpKindSelected = viewModel::onDraftUpKindSelected,
+            onReset = viewModel::onResetUpKindDraft,
+            onApply = viewModel::onApplyUpKindFilter,
         )
 
         PullToRefreshBox(
@@ -103,73 +122,79 @@ private fun HomeContent(
     onClearFilters: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when {
-        uiState.isLoading -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
+    Column(modifier = modifier.fillMaxSize()) {
+        if (uiState.isFilterLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        uiState.errorMessage != null && uiState.animals.isEmpty() -> {
-            HomeMessageContent(
-                message = uiState.errorMessage.orEmpty(),
-                actionLabel = stringResource(R.string.home_retry),
-                onAction = onRetry,
-                modifier = modifier,
-            )
-        }
+            uiState.errorMessage != null && uiState.animals.isEmpty() -> {
+                HomeMessageContent(
+                    message = uiState.errorMessage.orEmpty(),
+                    actionLabel = stringResource(R.string.home_retry),
+                    onAction = onRetry,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
 
-        uiState.isEmpty -> {
-            HomeMessageContent(
-                message = stringResource(R.string.home_empty),
-                actionLabel = stringResource(R.string.home_reset_filter),
-                onAction = onClearFilters,
-                modifier = modifier,
-            )
-        }
+            uiState.isEmpty && !uiState.isFilterLoading -> {
+                HomeMessageContent(
+                    message = stringResource(R.string.home_empty),
+                    actionLabel = stringResource(R.string.home_reset_filter),
+                    onAction = onClearFilters,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
 
-        else -> {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                state = gridState,
-                modifier = modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp,
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    HomeResultSummary(
-                        totalCount = uiState.totalCount,
-                        filterSummary = uiState.filterSummary,
-                    )
-                }
-
-                items(
-                    items = uiState.animals,
-                    key = { it.desertionNo },
-                ) { animal ->
-                    AnimalCard(
-                        animal = animal,
-                        onClick = { onAnimalClick(animal.desertionNo) },
-                    )
-                }
-
-                if (uiState.isLoadingMore) {
+            else -> {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    state = gridState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp,
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
+                        HomeResultSummary(
+                            totalCount = uiState.totalCount,
+                            filterSummary = uiState.filterSummary,
+                        )
+                    }
+
+                    items(
+                        items = uiState.animals,
+                        key = { it.desertionNo },
+                    ) { animal ->
+                        AnimalCard(
+                            animal = animal,
+                            onClick = { onAnimalClick(animal.desertionNo) },
+                        )
+                    }
+
+                    if (uiState.isLoadingMore) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }

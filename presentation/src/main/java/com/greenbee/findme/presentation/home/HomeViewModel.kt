@@ -8,6 +8,7 @@ import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalsUseCase
 import com.greenbee.findme.domain.usecase.GetSidoListUseCase
+import com.greenbee.findme.domain.usecase.GetSigunguListUseCase
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     private val getAbandonedAnimalsUseCase: GetAbandonedAnimalsUseCase,
     private val getSidoListUseCase: GetSidoListUseCase,
+    private val getSigunguListUseCase: GetSigunguListUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -34,35 +36,103 @@ class HomeViewModel @Inject constructor(
         loadAnimals(reset = true)
     }
 
-    fun onUpKindSelected(upKind: UpKind?) {
-        if (_uiState.value.selectedUpKind == upKind) return
-        _uiState.update { it.copy(selectedUpKind = upKind) }
-        loadAnimals(reset = true)
-    }
-
     fun onStateSelected(state: AbandonmentState) {
         val nextState = if (_uiState.value.selectedState == state) null else state
         _uiState.update { it.copy(selectedState = nextState) }
         loadAnimals(reset = true)
     }
 
-    fun onSidoFilterClick() {
-        _uiState.update { it.copy(isSidoFilterSheetVisible = true) }
-    }
-
-    fun onSidoFilterDismiss() {
-        _uiState.update { it.copy(isSidoFilterSheetVisible = false) }
-    }
-
-    fun onSidoSelected(sido: Region?) {
-        if (_uiState.value.selectedSido?.code == sido?.code) {
-            onSidoFilterDismiss()
-            return
-        }
+    fun onRegionFilterClick() {
+        val state = _uiState.value
         _uiState.update {
             it.copy(
-                selectedSido = sido,
-                isSidoFilterSheetVisible = false,
+                isRegionFilterSheetVisible = true,
+                draftSido = state.selectedSido,
+                draftSigungu = state.selectedSigungu,
+            )
+        }
+        state.selectedSido?.code?.let(::loadSigunguList)
+    }
+
+    fun onRegionFilterDismiss() {
+        _uiState.update {
+            it.copy(
+                isRegionFilterSheetVisible = false,
+                draftSido = it.selectedSido,
+                draftSigungu = it.selectedSigungu,
+            )
+        }
+    }
+
+    fun onUpKindFilterClick() {
+        _uiState.update {
+            it.copy(
+                isUpKindFilterSheetVisible = true,
+                draftUpKind = it.selectedUpKind,
+            )
+        }
+    }
+
+    fun onUpKindFilterDismiss() {
+        _uiState.update {
+            it.copy(
+                isUpKindFilterSheetVisible = false,
+                draftUpKind = it.selectedUpKind,
+            )
+        }
+    }
+
+    fun onDraftSidoSelected(sido: Region?) {
+        _uiState.update {
+            it.copy(
+                draftSido = sido,
+                draftSigungu = null,
+                sigunguList = emptyList(),
+            )
+        }
+        if (sido != null) {
+            loadSigunguList(sido.code)
+        }
+    }
+
+    fun onDraftSigunguSelected(sigungu: Region?) {
+        _uiState.update { it.copy(draftSigungu = sigungu) }
+    }
+
+    fun onDraftUpKindSelected(upKind: UpKind?) {
+        _uiState.update { it.copy(draftUpKind = upKind) }
+    }
+
+    fun onResetRegionDraft() {
+        _uiState.update {
+            it.copy(
+                draftSido = null,
+                draftSigungu = null,
+                sigunguList = emptyList(),
+            )
+        }
+    }
+
+    fun onResetUpKindDraft() {
+        _uiState.update { it.copy(draftUpKind = null) }
+    }
+
+    fun onApplyRegionFilter() {
+        _uiState.update {
+            it.copy(
+                selectedSido = it.draftSido,
+                selectedSigungu = it.draftSigungu,
+                isRegionFilterSheetVisible = false,
+            )
+        }
+        loadAnimals(reset = true)
+    }
+
+    fun onApplyUpKindFilter() {
+        _uiState.update {
+            it.copy(
+                selectedUpKind = it.draftUpKind,
+                isUpKindFilterSheetVisible = false,
             )
         }
         loadAnimals(reset = true)
@@ -75,11 +145,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun clearFilters() {
-        if (
-            _uiState.value.selectedUpKind == null &&
-            _uiState.value.selectedState == null &&
-            _uiState.value.selectedSido == null
-        ) {
+        if (!hasActiveFilters(_uiState.value)) {
             retry()
             return
         }
@@ -88,6 +154,11 @@ class HomeViewModel @Inject constructor(
                 selectedUpKind = null,
                 selectedState = null,
                 selectedSido = null,
+                selectedSigungu = null,
+                draftSido = null,
+                draftSigungu = null,
+                draftUpKind = null,
+                sigunguList = emptyList(),
             )
         }
         loadAnimals(reset = true)
@@ -120,6 +191,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun loadSigunguList(sidoCode: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSigunguListLoading = true, sigunguList = emptyList()) }
+            runCatching { getSigunguListUseCase(sidoCode) }
+                .onSuccess { result ->
+                    _uiState.update {
+                        it.copy(
+                            sigunguList = result.items,
+                            isSigunguListLoading = false,
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(isSigunguListLoading = false) }
+                }
+        }
+    }
+
     private fun loadAnimals(reset: Boolean, fromPullRefresh: Boolean = false) {
         if (isRequestInFlight) return
 
@@ -131,6 +220,7 @@ class HomeViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     isLoading = reset && !fromPullRefresh && it.animals.isEmpty(),
+                    isFilterLoading = reset && !fromPullRefresh && it.animals.isNotEmpty(),
                     isRefreshing = fromPullRefresh,
                     isLoadingMore = !reset,
                     errorMessage = null,
@@ -149,6 +239,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isFilterLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
                         animals = mergedAnimals,
@@ -157,6 +248,7 @@ class HomeViewModel @Inject constructor(
                             upKind = it.selectedUpKind,
                             state = it.selectedState,
                             sido = it.selectedSido,
+                            sigungu = it.selectedSigungu,
                         ),
                         canLoadMore = canLoadMore,
                         isEmpty = mergedAnimals.isEmpty(),
@@ -167,6 +259,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isFilterLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
                         errorMessage = error.message ?: "유기동물 정보를 불러오지 못했습니다.",
@@ -185,14 +278,19 @@ class HomeViewModel @Inject constructor(
             upKind = state.selectedUpKind,
             state = state.selectedState,
             sidoCode = state.selectedSido?.code,
+            sigunguCode = state.selectedSigungu?.code,
         )
 
     private fun buildFilterSummary(
         upKind: UpKind?,
         state: AbandonmentState?,
         sido: Region?,
+        sigungu: Region?,
     ): String = buildList {
-        sido?.name?.let(::add)
+        when {
+            sigungu != null -> add(sigungu.name)
+            sido != null -> add(sido.name)
+        }
         when (upKind) {
             UpKind.DOG -> add("개")
             UpKind.CAT -> add("고양이")
@@ -206,6 +304,12 @@ class HomeViewModel @Inject constructor(
         }
         add("최근 30일")
     }.joinToString(separator = " · ")
+
+    private fun hasActiveFilters(state: HomeUiState): Boolean =
+        state.selectedUpKind != null ||
+            state.selectedState != null ||
+            state.selectedSido != null ||
+            state.selectedSigungu != null
 
     private companion object {
         const val PAGE_SIZE = 20

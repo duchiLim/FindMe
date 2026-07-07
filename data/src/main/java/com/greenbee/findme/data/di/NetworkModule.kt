@@ -1,7 +1,10 @@
 package com.greenbee.findme.data.di
 
+import android.util.Log
 import com.greenbee.findme.data.BuildConfig
 import com.greenbee.findme.data.remote.AbandonmentPublicApi
+import com.greenbee.findme.data.remote.interceptor.HttpErrorLoggingInterceptor
+import com.greenbee.findme.data.remote.NetworkLogRedactor
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -39,10 +42,14 @@ object NetworkModule {
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
         if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
-            }
-            builder.addInterceptor(loggingInterceptor)
+            builder.addInterceptor(HttpErrorLoggingInterceptor())
+            builder.addInterceptor(
+                HttpLoggingInterceptor { message ->
+                    Log.d(NETWORK_LOG_TAG, NetworkLogRedactor.redact(message))
+                }.apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
         }
 
         return builder.build()
@@ -65,4 +72,5 @@ object NetworkModule {
         retrofit.create(AbandonmentPublicApi::class.java)
 
     private const val TIMEOUT_SECONDS = 30L
+    private const val NETWORK_LOG_TAG = "FindMe-Network"
 }

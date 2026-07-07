@@ -1,7 +1,13 @@
 package com.greenbee.findme.data.di
 
-import com.greenbee.findme.data.repository.SampleRepositoryImpl
-import com.greenbee.findme.domain.repository.SampleRepository
+import com.greenbee.findme.data.repository.AbandonedAnimalRepositoryImpl
+import com.greenbee.findme.data.repository.AnimalKindRepositoryImpl
+import com.greenbee.findme.data.repository.RegionRepositoryImpl
+import com.greenbee.findme.data.repository.ShelterRepositoryImpl
+import com.greenbee.findme.domain.repository.AbandonedAnimalRepository
+import com.greenbee.findme.domain.repository.AnimalKindRepository
+import com.greenbee.findme.domain.repository.RegionRepository
+import com.greenbee.findme.domain.repository.ShelterRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,7 +20,25 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindSampleRepository(
-        impl: SampleRepositoryImpl,
-    ): SampleRepository
+    abstract fun bindAbandonedAnimalRepository(
+        impl: AbandonedAnimalRepositoryImpl,
+    ): AbandonedAnimalRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRegionRepository(
+        impl: RegionRepositoryImpl,
+    ): RegionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindShelterRepository(
+        impl: ShelterRepositoryImpl,
+    ): ShelterRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAnimalKindRepository(
+        impl: AnimalKindRepositoryImpl,
+    ): AnimalKindRepository
 }

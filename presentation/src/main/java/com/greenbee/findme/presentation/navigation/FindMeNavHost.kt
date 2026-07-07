@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.greenbee.findme.presentation.common.PlaceholderScreen
+import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.home.HomeScreen
 
 @Composable
@@ -22,7 +23,11 @@ fun FindMeNavHost(
         modifier = modifier,
     ) {
         composable(FindMeRoute.HOME) {
-            HomeScreen()
+            HomeScreen(
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+            )
         }
         composable(FindMeRoute.FAVORITE) {
             PlaceholderScreen(title = "찜한 동물")
@@ -38,8 +43,9 @@ fun FindMeNavHost(
             arguments = listOf(
                 navArgument("desertionNo") { type = NavType.StringType },
             ),
-        ) {
-            PlaceholderScreen(title = "동물 상세")
+        ) { backStackEntry ->
+            val desertionNo = backStackEntry.arguments?.getString("desertionNo").orEmpty()
+            AnimalDetailScreen(desertionNo = desertionNo)
         }
     }
 }

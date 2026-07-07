@@ -7,7 +7,7 @@ data class AbandonedAnimal(
     val color: String,
     val age: String,
     val weight: String,
-    val imageUrl: String,
+    val imageUrls: List<String>,
     val processState: String,
     val shelterName: String,
     val shelterTel: String,

@@ -22,7 +22,7 @@ internal fun AbandonmentItemDto.toDomain(): AbandonedAnimal? {
         color = colorCd.orEmpty(),
         age = age.orEmpty(),
         weight = weight.orEmpty(),
-        imageUrl = popfile.orEmpty(),
+        imageUrls = toImageUrls(),
         processState = processState.orEmpty(),
         shelterName = careNm.orEmpty(),
         shelterTel = careTel.orEmpty(),
@@ -31,6 +31,12 @@ internal fun AbandonmentItemDto.toDomain(): AbandonedAnimal? {
         neuterYn = neuterYn.orEmpty(),
     )
 }
+
+internal fun AbandonmentItemDto.toImageUrls(): List<String> =
+    buildList {
+        popfile?.takeIf { it.isNotBlank() }?.let(::add)
+        popfile1?.takeIf { it.isNotBlank() }?.let(::add)
+    }
 
 internal fun SidoItemDto.toDomain(): Region? {
     val regionCode = code?.takeIf { it.isNotBlank() } ?: return null

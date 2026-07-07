@@ -107,6 +107,7 @@ data class AbandonmentItemDto(
     val age: String? = null,
     val weight: String? = null,
     val popfile: String? = null,
+    @SerialName("popfile1") val popfile1: String? = null,
     @SerialName("processState") val processState: String? = null,
     @SerialName("careNm") val careNm: String? = null,
     @SerialName("careTel") val careTel: String? = null,

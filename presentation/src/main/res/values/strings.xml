@@ -4,4 +4,15 @@
     <string name="nav_favorite">찜</string>
     <string name="nav_shelter">보호소</string>
     <string name="nav_my">마이</string>
+    <string name="home_filter_all">전체</string>
+    <string name="home_filter_dog">개</string>
+    <string name="home_filter_cat">고양이</string>
+    <string name="home_filter_notice">공고중</string>
+    <string name="home_filter_protect">보호중</string>
+    <string name="home_total_count">유기동물 %1$d마리</string>
+    <string name="home_empty">조건에 맞는 유기동물이 없습니다.</string>
+    <string name="home_retry">다시 시도</string>
+    <string name="home_reset_filter">필터 초기화</string>
+    <string name="home_detail_title">동물 상세</string>
+    <string name="home_detail_placeholder">상세 화면은 준비 중입니다.</string>
 </resources>

@@ -318,7 +318,7 @@ FindMeApplication (@HiltAndroidApp)
 | 문서 | 내용 |
 |------|------|
 | [DESIGN_GUIDE.md](./DESIGN_GUIDE.md) | UI 컬러, 타이포, 스플래시 |
-| [PLANNING.md](./PLANNING.md) | 서비스 기획·기능 정의 |
+| [PLANNING.md](./planning/PLANNING.md) | 서비스 기획·기능 정의 |
 | [API_LIST.md](./API_LIST.md) | API 목록 |
 | [PUBLIC_DATA_API.md](./PUBLIC_DATA_API.md) | 공공데이터 API 상세 |
 

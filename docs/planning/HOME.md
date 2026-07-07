@@ -105,7 +105,7 @@
 
 | 우선순위 | 필드 | Domain / API | UI |
 | :---: | :--- | :--- | :--- |
-| 1 | 사진 | `imageUrl` (`popfile`) | Coil, placeholder: 발바닥 아이콘 |
+| 1 | 사진 | `imageUrls` (`popfile1`, `popfile2`) | Coil, placeholder: 발바닥 아이콘 |
 | 2 | 품종 | `kindName` (`kindCd`) | Body 1, 1줄 ellipsis |
 | 3 | 상태 | `processState` | 상태 칩 (색상: DESIGN_GUIDE §2.3) |
 | 4 | 보호소 | `shelterName` (`careNm`) | Body 2, 1줄 |
@@ -209,7 +209,7 @@ data class HomeUiState(
 
 | UI | Domain (`AbandonedAnimal`) |
 | :--- | :--- |
-| 사진 | `imageUrl` |
+| 사진 | `imageUrls` (`popfile1`, `popfile2`) |
 | 품종 | `kindName` |
 | 상태 | `processState` |
 | 보호소 | `shelterName` |

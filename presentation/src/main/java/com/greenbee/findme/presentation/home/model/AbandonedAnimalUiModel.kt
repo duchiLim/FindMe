@@ -41,7 +41,7 @@ fun AbandonedAnimal.toUiModel(): AbandonedAnimalUiModel =
         statusType = processState.toProcessStateType(),
     )
 
-private fun String.toProcessStateType(): ProcessStateType {
+fun String.toProcessStateType(): ProcessStateType {
     val normalized = lowercase()
     return when {
         normalized.contains("공고") || normalized.contains("입양") -> ProcessStateType.NOTICE

@@ -43,9 +43,10 @@ fun FindMeNavHost(
             arguments = listOf(
                 navArgument("desertionNo") { type = NavType.StringType },
             ),
-        ) { backStackEntry ->
-            val desertionNo = backStackEntry.arguments?.getString("desertionNo").orEmpty()
-            AnimalDetailScreen(desertionNo = desertionNo)
+        ) {
+            AnimalDetailScreen(
+                onBackClick = { navController.popBackStack() },
+            )
         }
     }
 }

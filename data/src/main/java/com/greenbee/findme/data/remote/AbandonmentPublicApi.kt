@@ -58,6 +58,7 @@ interface AbandonmentPublicApi {
         @Query("upr_cd") sidoCode: String? = null,
         @Query("org_cd") sigunguCode: String? = null,
         @Query("state") state: String? = null,
+        @Query("desertion_no") desertionNo: String? = null,
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<AbandonmentItemsDto>
 }

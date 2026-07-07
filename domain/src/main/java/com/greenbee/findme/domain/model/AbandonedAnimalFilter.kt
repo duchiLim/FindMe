@@ -9,4 +9,5 @@ data class AbandonedAnimalFilter(
     val state: AbandonmentState? = null,
     val sidoCode: String? = null,
     val sigunguCode: String? = null,
+    val desertionNo: String? = null,
 )

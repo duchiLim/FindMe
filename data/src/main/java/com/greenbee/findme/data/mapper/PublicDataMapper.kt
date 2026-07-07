@@ -34,9 +34,9 @@ internal fun AbandonmentItemDto.toDomain(): AbandonedAnimal? {
 
 internal fun AbandonmentItemDto.toImageUrls(): List<String> =
     buildList {
-        popfile?.takeIf { it.isNotBlank() }?.let(::add)
         popfile1?.takeIf { it.isNotBlank() }?.let(::add)
-    }
+        popfile2?.takeIf { it.isNotBlank() }?.let(::add)
+    }.distinct()
 
 internal fun SidoItemDto.toDomain(): Region? {
     val regionCode = code?.takeIf { it.isNotBlank() } ?: return null

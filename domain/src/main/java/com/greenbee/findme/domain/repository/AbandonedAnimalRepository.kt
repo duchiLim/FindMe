@@ -6,4 +6,8 @@ import com.greenbee.findme.domain.model.PagedResult
 
 interface AbandonedAnimalRepository {
     suspend fun getAbandonedAnimals(filter: AbandonedAnimalFilter): PagedResult<AbandonedAnimal>
+
+    fun getCachedAbandonedAnimal(desertionNo: String): AbandonedAnimal?
+
+    suspend fun getAbandonedAnimal(desertionNo: String): AbandonedAnimal?
 }

@@ -99,7 +99,7 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 
 | 화면 | Route | 진입 경로 |
 | :--- | :--- | :--- |
-| 동물 상세 | `animal/{desertionNo}` | 홈·찜 리스트에서 카드 선택 |
+| 동물 상세 | `animal/{desertionNo}` | 홈·찜 리스트에서 카드 선택 · 상세 기획: [DETAIL.md](./DETAIL.md) |
 
 탭 전환 시 **상태 유지** (`saveState` / `restoreState`)로 각 탭의 스크롤·필터를 보존합니다.
 

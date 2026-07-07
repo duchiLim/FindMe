@@ -16,7 +16,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.greenbee.findme.presentation.Greeting
 import com.greenbee.findme.presentation.splash.AnimatedSplashScreen
 import com.greenbee.findme.presentation.ui.theme.FindMeTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

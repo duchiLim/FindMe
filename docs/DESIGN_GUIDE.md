@@ -53,5 +53,59 @@
 - **기본 마진 (Screen Margin)**: `16.dp`
 - **컴포넌트 간 간격 (Gutter)**: `8.dp` 또는 `12.dp` (8배수 그리드 시스템 권장)
 
+## 6. 스플래시 (Splash)
+
+### 6.1 구성
+스플래시는 **2단계**로 동작합니다.
+
+| 단계 | 역할 | 표시 내용 |
+|------|------|-----------|
+| **시스템 스플래시** | 앱 cold start 직후 | Primary 배경색만 (아이콘 없음) |
+| **애니메이션 스플래시** | Compose `AnimatedSplashScreen` | 로고 등장 애니메이션 |
+
+시스템 스플래시에 런처 아이콘을 노출하지 않습니다. 아이콘이 미리 보이면 Compose 애니메이션(0%에서 등장)과 겹쳐 어색해지기 때문입니다.
+
+### 6.2 비주얼
+
+| 요소 | 스펙 |
+|------|------|
+| **배경** | Primary `#FFAB91` |
+| **로고** | 흰색 하트 + Primary Variant `#FF8A65` 발바닥 (런처 아이콘과 동일) |
+| **로고 크기** | `200.dp` (화면 중앙) |
+| **에셋** | `presentation/.../drawable/ic_splash_logo.xml` |
+
+### 6.3 애니메이션
+
+**"안 보이는 상태 → 점점 커지며 나타남"**
+
+| 속성 | 값 | Easing |
+|------|-----|--------|
+| **Scale** | 0% → 100% / 650ms | `LinearOutSlowIn` |
+| **Opacity** | 0% → 100% / 350ms | `FastOutLinearIn` |
+| **정지** | 500ms (최대 크기 유지) | — |
+
+**총 재생 시간: 약 1.15초** (650ms + 500ms hold, opacity는 scale보다 먼저 완료)
+
+구현: Compose `Animatable` + `graphicsLayer` (`presentation/.../splash/SplashScreen.kt`)
+
+> **Lottie 사용 안 함** — 하트 path를 JSON으로 직접 작성하면 scale 애니메이션 중 path가 깨질 수 있습니다. 로고 변경 시 `ic_splash_logo.xml`(및 런처 foreground)을 함께 수정하세요.
+
+### 6.4 관련 파일
+
+| 파일 | 설명 |
+|------|------|
+| `app/.../themes.xml` | `Theme.App.Starting` — 시스템 스플래시 배경·투명 아이콘 |
+| `app/.../drawable/ic_splash_empty.xml` | 시스템 스플래시용 투명 아이콘 |
+| `app/.../drawable/ic_launcher_foreground.xml` | 런처·로고 마스터 (스플래시 로고와 동일 구성) |
+| `presentation/.../splash/SplashScreen.kt` | 애니메이션 스플래시 Composable |
+| `presentation/.../values/colors.xml` | `@color/primary`, `@color/primary_variant` |
+
+### 6.5 타이밍 조정
+`SplashScreen.kt` 상단 상수로 조정합니다.
+
+- `GrowDurationMs` — 커지는 속도
+- `FadeInDurationMs` — 나타나는 속도
+- `HoldDurationMs` — 애니메이션 종료 후 정지 시간
+
 ---
 *이 가이드는 프로젝트 진행에 따라 지속적으로 업데이트됩니다.*

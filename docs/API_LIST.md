@@ -3,18 +3,19 @@
 구조동물(유기동물) 조회를 위해 제공되는 Open API 엔드포인트와 각 기능별 상세 명세입니다.
 
 ## 1. 기본 정보
-- **Base URL**: `http://apis.data.go.kr/1543061/abandonmentPublicSrvc/`
+- **Base URL**: `http://apis.data.go.kr/1543061/abandonmentPublicService_v2/`
 - **데이터 형식**: XML (기본) / JSON (요청 파라미터 `_type=json` 추가 시)
+- **참고**: 구버전 `abandonmentPublicSrvc`는 더 이상 사용하지 않습니다. 서비스 URL과 상세 기능 코드 모두 `_v2`를 사용합니다.
 
 ## 2. API 엔드포인트 목록
 
 | 기능 | 엔드포인트 | 설명 | 주요 파라미터 |
 | :--- | :--- | :--- | :--- |
-| **유기동물 조회** | `abandonmentPublic` | 구조된 유기동물 목록 및 상세 정보 | `bgnde`, `endde`, `upkind`, `state` |
-| **시도 조회** | `sido` | 전국의 행정구역(시도) 코드 및 이름 | - |
-| **시군구 조회** | `sigungu` | 특정 시도에 속한 시군구 코드 및 이름 | `upr_cd` (시도코드) |
-| **보호소 조회** | `shelter` | 특정 시군구에 위치한 동물보호소 목록 | `upr_cd`, `org_cd` (시군구코드) |
-| **품종 조회** | `kind` | 축종별 세부 품종 코드 및 이름 | `up_kind_cd` (축종코드) |
+| **유기동물 조회** | `abandonmentPublic_v2` | 구조된 유기동물 목록 및 상세 정보 | `bgnde`, `endde`, `upkind`, `state` |
+| **시도 조회** | `sido_v2` | 전국의 행정구역(시도) 코드 및 이름 | - |
+| **시군구 조회** | `sigungu_v2` | 특정 시도에 속한 시군구 코드 및 이름 | `upr_cd` (시도코드) |
+| **보호소 조회** | `shelter_v2` | 특정 시군구에 위치한 동물보호소 목록 | `upr_cd`, `org_cd` (시군구코드) |
+| **품종 조회** | `kind_v2` | 축종별 세부 품종 코드 및 이름 | `up_kind_cd` (축종코드) |
 
 ## 3. 관련 연관 API
 유기동물 구조 정보 외에 추가적으로 활용 가능한 서비스입니다.

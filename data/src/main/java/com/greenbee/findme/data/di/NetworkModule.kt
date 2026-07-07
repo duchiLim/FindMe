@@ -22,7 +22,7 @@ import retrofit2.Retrofit
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "http://apis.data.go.kr/1543061/abandonmentPublicSrvc/"
+    private const val BASE_URL = "http://apis.data.go.kr/1543061/abandonmentPublicService_v2/"
     private val jsonMediaType = "application/json".toMediaType()
 
     @Provides

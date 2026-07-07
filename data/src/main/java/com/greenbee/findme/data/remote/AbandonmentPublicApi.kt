@@ -11,7 +11,7 @@ import retrofit2.http.Query
 
 interface AbandonmentPublicApi {
 
-    @GET("sido")
+    @GET("sido_v2")
     suspend fun getSidoList(
         @Query("serviceKey") serviceKey: String,
         @Query("numOfRows") numOfRows: Int,
@@ -19,7 +19,7 @@ interface AbandonmentPublicApi {
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<SidoItemsDto>
 
-    @GET("sigungu")
+    @GET("sigungu_v2")
     suspend fun getSigunguList(
         @Query("serviceKey") serviceKey: String,
         @Query("upr_cd") sidoCode: String,
@@ -28,7 +28,7 @@ interface AbandonmentPublicApi {
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<SigunguItemsDto>
 
-    @GET("shelter")
+    @GET("shelter_v2")
     suspend fun getShelterList(
         @Query("serviceKey") serviceKey: String,
         @Query("upr_cd") sidoCode: String,
@@ -38,7 +38,7 @@ interface AbandonmentPublicApi {
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<ShelterItemsDto>
 
-    @GET("kind")
+    @GET("kind_v2")
     suspend fun getKindList(
         @Query("serviceKey") serviceKey: String,
         @Query("up_kind_cd") upKindCode: String,
@@ -47,7 +47,7 @@ interface AbandonmentPublicApi {
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<KindItemsDto>
 
-    @GET("abandonmentPublic")
+    @GET("abandonmentPublic_v2")
     suspend fun getAbandonmentList(
         @Query("serviceKey") serviceKey: String,
         @Query("numOfRows") numOfRows: Int,

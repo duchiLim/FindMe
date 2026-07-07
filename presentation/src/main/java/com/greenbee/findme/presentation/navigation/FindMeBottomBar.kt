@@ -21,22 +21,22 @@ private val topLevelDestinations = listOf(
     TopLevelDestination(
         route = FindMeRoute.HOME,
         labelRes = R.string.nav_home,
-        iconRes = R.drawable.ic_home_pet,
-    ),
-    TopLevelDestination(
-        route = FindMeRoute.FAVORITE,
-        labelRes = R.string.nav_favorite,
-        iconRes = R.drawable.ic_paw,
+        iconRes = R.drawable.ic_nav_home,
     ),
     TopLevelDestination(
         route = FindMeRoute.SHELTER,
         labelRes = R.string.nav_shelter,
-        iconRes = R.drawable.ic_dog_face,
+        iconRes = R.drawable.ic_nav_shelter,
+    ),
+    TopLevelDestination(
+        route = FindMeRoute.FAVORITE,
+        labelRes = R.string.nav_favorite,
+        iconRes = R.drawable.ic_nav_favorite,
     ),
     TopLevelDestination(
         route = FindMeRoute.MY,
         labelRes = R.string.nav_my,
-        iconRes = R.drawable.ic_cat_face,
+        iconRes = R.drawable.ic_nav_my,
     ),
 )
 

@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.greenbee.findme.presentation.Greeting
+import com.greenbee.findme.presentation.home.HomeScreen
 import com.greenbee.findme.presentation.splash.AnimatedSplashScreen
 import com.greenbee.findme.presentation.ui.theme.FindMeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,10 +39,7 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        Greeting(
-                            name = "Android",
-                            modifier = Modifier.padding(innerPadding),
-                        )
+                        HomeScreen(modifier = Modifier.padding(innerPadding))
                     }
                 }
             }

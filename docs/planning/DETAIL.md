@@ -8,7 +8,7 @@
 ## 1. 화면 개요
 
 ### 1.1 한 줄 정의
-**홈·찜에서 선택한 유기동물 한 마리의 사진·프로필·특징·보호소 정보를 확인하고, 입양 문의(전화)로 이어지는 상세 화면.**
+**홈·마음에 두기에서 선택한 유기동물 한 마리의 사진·프로필·특징·보호소 정보를 확인하고, 입양 문의(전화)로 이어지는 상세 화면.**
 
 ### 1.2 화면 목표
 
@@ -16,14 +16,14 @@
 | :--- | :--- |
 | **정보 전달** | 카드에서 보지 못한 세부 정보(성별, 중성화, 특징, 발견 장소 등)를 한곳에 모은다 |
 | **신뢰 형성** | 공공데이터 기반 공고 상태·보호소 연락처를 명확히 보여준다 |
-| **행동 유도** | 보호소 전화·찜하기 등 다음 행동으로 자연스럽게 연결한다 |
+| **행동 유도** | 보호소 전화·마음에 두기 등 다음 행동으로 자연스럽게 연결한다 |
 
 ### 1.3 사용자 시나리오
 
 1. 홈 그리드에서 카드 탭 → **동물 상세** 진입 (`desertionNo` 전달)
 2. 사진을 넘기며 확인하고, 품종·나이·특징을 읽는다
 3. (MVP) **보호소에 전화** 버튼으로 입양·방문 문의
-4. (Phase 2) **찜** 버튼으로 관심 목록 저장
+4. (Phase 2) **마음에 두기** 버튼으로 관심 목록 저장
 5. (Phase 2) 보호소명 탭 → 보호소 탭/지도로 이동
 6. 뒤로가기 → 홈 스크롤·필터 상태 유지
 
@@ -32,7 +32,7 @@
 | 항목 | 규칙 |
 | :--- | :--- |
 | Bottom Bar | **숨김** (탭 바깥 push 화면) |
-| 진입 경로 | 홈 카드 탭 · (Phase 2) 찜 탭 · (Phase 2) 마이 > 최근 본 동물 |
+| 진입 경로 | 홈 카드 탭 · (Phase 2) 마음에 두기 탭 · (Phase 2) 마이 > 최근 본 동물 |
 | 식별 키 | `desertionNo` (유기번호, 공고 고유 ID) |
 | 뒤로가기 | `navController.popBackStack()` |
 
@@ -75,7 +75,7 @@
 │                                     │
 │  유기번호 2024-000000000            │  ← desertionNo (캡션)
 ├─────────────────────────────────────┤
-│  [  ♡ 찜하기  ]  [ 📞 보호소 전화 ] │  ← Sticky Bottom Bar (Phase 2 / MVP)
+│  [  ♡ 마음에 두기  ]  [ 📞 보호소 전화 ] │  ← Sticky Bottom Bar (Phase 2 / MVP)
 └─────────────────────────────────────┘
 ```
 
@@ -97,7 +97,7 @@
 | :--- | :---: | :---: |
 | 뒤로가기 | ✅ | ✅ |
 | 타이틀 | 품종명 (`kindName`) 1줄 ellipsis | 동일 |
-| 찜(♡) | 🔲 | ✅ |
+| 마음에 두기(♡) | 🔲 | ✅ |
 | 더보기(⋮) | 🔲 | 공유, 신고 등 |
 
 - 타이틀에는 API `kindNm` 품종명 표시 (예: `믹스견`)
@@ -171,10 +171,10 @@ Phase 2에서 API 확장 시 **발견일**(`happenDt`), **공고 기간**(`notic
 | 버튼 | MVP | Phase 2 |
 | :--- | :---: | :---: |
 | **보호소에 전화** (Primary, full-width 또는 60%) | ✅ | ✅ |
-| **찜하기** (Outlined / Icon) | 🔲 | ✅ |
+| **마음에 두기** (Outlined / Icon) | 🔲 | ✅ |
 
 - 전화번호 없음: 버튼 disabled + "연락처 없음" 토스트
-- 찜: Room 연동 후 filled/outlined 토글
+- 마음에 두기: Room 연동 후 filled/outlined 토글
 
 ### 3.9 메타 정보 (하단 캡션)
 
@@ -211,8 +211,8 @@ Phase 2에서 API 확장 시 **발견일**(`happenDt`), **공고 기간**(`notic
 
 | 방안 | 설명 | 장점 | 단점 |
 | :---: | :--- | :--- | :--- |
-| **A. ID 재조회 (권장)** | `desertionNo`로 `abandonmentPublic_v2` 재호출 (`desertionNo` 쿼리 + 넓은 기간) | 딥링크·찜 탭 진입 가능, 최신 상태 | API 1회 추가 |
-| **B. Nav 인자 전달** | 홈에서 `AbandonedAnimal` 직렬화 전달 | 즉시 표시, API 없음 | 찜·딥링크 불가, Nav payload 한계 |
+| **A. ID 재조회 (권장)** | `desertionNo`로 `abandonmentPublic_v2` 재호출 (`desertionNo` 쿼리 + 넓은 기간) | 딥링크·마음에 두기 탭 진입 가능, 최신 상태 | API 1회 추가 |
+| **B. Nav 인자 전달** | 홈에서 `AbandonedAnimal` 직렬화 전달 | 즉시 표시, API 없음 | 마음에 두기·딥링크 불가, Nav payload 한계 |
 | **C. 메모리 캐시** | Repository in-memory cache by `desertionNo` | 홈 진입 빠름 | 앱 재시작·다른 진입 경로 취약 |
 
 **MVP 권장:** **A + C 하이브리드**
@@ -269,10 +269,10 @@ data class AnimalDetailUiState(
 | From | Action | To |
 | :--- | :--- | :--- |
 | 홈 카드 | `FindMeRoute.animalDetail(desertionNo)` | 동물 상세 |
-| (Phase 2) 찜 카드 | 동일 | 동물 상세 |
+| (Phase 2) 마음에 둔 카드 | 동일 | 동물 상세 |
 | (Phase 2) 마이 > 최근 본 | 동일 + Room 기록 | 동물 상세 |
 | 보호소 전화 | `ACTION_DIAL` | 시스템 전화 앱 |
-| (Phase 2) 찜 | Room insert/delete | 스낵바 "찜 목록에 추가" |
+| (Phase 2) 마음에 두기 | Room insert/delete | 스낵바 "마음에 둔 목록에 추가" |
 | (Phase 2) 보호소명 | 보호소 탭 navigate | `shelter` (+ careRegNo) |
 
 **최근 본 동물 (Phase 2):** 상세 진입 시 `desertionNo` + 타임스탬프 Room 저장 → 마이 탭 노출.
@@ -294,7 +294,7 @@ data class AnimalDetailUiState(
 
 ### Phase 2
 
-- [ ] 찜하기 (Room + TopBar/BottomBar)
+- [ ] 마음에 두기 (Room + TopBar/BottomBar)
 - [ ] Pull-to-refresh (상세 재조회)
 - [ ] 보호소 주소 · 지도 · 길찾기
 - [ ] 공고 기간 / D-day
@@ -306,7 +306,7 @@ data class AnimalDetailUiState(
 
 - [ ] 입양·임시보호 신청서 바로가기 (마이 연동)
 - [ ] 유사 동물 추천 (같은 보호소·품종)
-- [ ] 공고 변경 알림 (찜한 동물 상태 변경)
+- [ ] 공고 변경 알림 (마음에 둔 동물 상태 변경)
 
 ---
 
@@ -328,7 +328,7 @@ data class AnimalDetailUiState(
 2. **Presentation Core:** ViewModel, UiState, UiModel, mapper (성별·중성화 표시 문자열)
 3. **UI 조립:** Screen + 섹션 Composable
 4. **CTA:** 전화 Intent 연동
-5. **Phase 2:** 찜, 최근 본, 보호소 연동
+5. **Phase 2:** 마음에 두기, 최근 본, 보호소 연동
 
 ---
 
@@ -340,7 +340,7 @@ data class AnimalDetailUiState(
 | 2 | 사진 비율 1:1 vs 4:3 | **4:3** — 상세에서 여유 있게 |
 | 3 | `sexCd` / `neuterYn` 표시 | Presentation mapper에서 `M`→수컷, `F`→암컷, `Y`→예 등 정규화 |
 | 4 | 종료 공고 상세 진입 | 홈에서 탭 가능하면 **회색 UI + 전화 disabled** |
-| 5 | TopBar 찜 vs Bottom 찜 | Phase 2: **TopBar 아이콘 + Bottom 보조** 중 Bottom만으로 MVP 이후 통일 |
+| 5 | TopBar vs Bottom 마음에 두기 | Phase 2: **TopBar 아이콘 + Bottom 보조** 중 Bottom만으로 MVP 이후 통일 |
 | 6 | Domain 필드 확장 시점 | MVP는 기존 12필드로 시작, Phase 2에서 `happenDt`·`careAddr` 추가 |
 
 ---
@@ -353,7 +353,7 @@ data class AnimalDetailUiState(
 | `AnimalDetailScreen` | ✅ |
 | ViewModel / UseCase | ✅ |
 | UI 섹션·CTA | ✅ |
-| 찜 / 최근 본 | 🔲 |
+| 마음에 두기 / 최근 본 | 🔲 |
 
 ---
 

@@ -2,7 +2,9 @@ package com.greenbee.findme.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
+import com.greenbee.findme.presentation.R
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,7 +32,7 @@ fun FindMeNavHost(
             )
         }
         composable(FindMeRoute.FAVORITE) {
-            PlaceholderScreen(title = "찜한 동물")
+            PlaceholderScreen(title = stringResource(R.string.favorite_screen_title))
         }
         composable(FindMeRoute.SHELTER) {
             PlaceholderScreen(title = "보호소")

@@ -5,6 +5,9 @@
     <string name="nav_shelter">보호소</string>
     <string name="nav_my">마이</string>
     <string name="home_filter_all">전체</string>
+    <string name="home_filter_sido">시도</string>
+    <string name="home_filter_nationwide">전국</string>
+    <string name="home_sido_filter_title">시도 선택</string>
     <string name="home_filter_dog">개</string>
     <string name="home_filter_cat">고양이</string>
     <string name="home_filter_notice">공고중</string>

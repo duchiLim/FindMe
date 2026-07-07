@@ -55,6 +55,7 @@ interface AbandonmentPublicApi {
         @Query("bgnde") beginDate: String? = null,
         @Query("endde") endDate: String? = null,
         @Query("upkind") upKind: String? = null,
+        @Query("upr_cd") sidoCode: String? = null,
         @Query("state") state: String? = null,
         @Query("_type") responseType: String = "json",
     ): PublicDataResponseDto<AbandonmentItemsDto>

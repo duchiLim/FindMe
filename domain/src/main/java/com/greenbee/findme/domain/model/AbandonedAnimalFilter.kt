@@ -7,4 +7,5 @@ data class AbandonedAnimalFilter(
     val endDate: String? = null,
     val upKind: UpKind? = null,
     val state: AbandonmentState? = null,
+    val sidoCode: String? = null,
 )

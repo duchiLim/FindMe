@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.component.AnimalCard
 import com.greenbee.findme.presentation.home.component.HomeFilterChipsRow
+import com.greenbee.findme.presentation.home.component.HomeSidoFilterBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,10 +61,21 @@ fun HomeScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         HomeFilterChipsRow(
+            selectedSido = uiState.selectedSido,
             selectedUpKind = uiState.selectedUpKind,
             selectedState = uiState.selectedState,
+            onSidoFilterClick = viewModel::onSidoFilterClick,
             onUpKindSelected = viewModel::onUpKindSelected,
             onStateSelected = viewModel::onStateSelected,
+        )
+
+        HomeSidoFilterBottomSheet(
+            visible = uiState.isSidoFilterSheetVisible,
+            sidoList = uiState.sidoList,
+            selectedSido = uiState.selectedSido,
+            isLoading = uiState.isSidoListLoading,
+            onDismiss = viewModel::onSidoFilterDismiss,
+            onSidoSelected = viewModel::onSidoSelected,
         )
 
         PullToRefreshBox(

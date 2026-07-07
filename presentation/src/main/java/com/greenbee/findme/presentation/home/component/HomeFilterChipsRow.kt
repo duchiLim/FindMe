@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.greenbee.findme.domain.model.AbandonmentState
+import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.ui.theme.FindMeOnPrimary
@@ -21,8 +22,10 @@ import com.greenbee.findme.presentation.ui.theme.FindMePrimary
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeFilterChipsRow(
+    selectedSido: Region?,
     selectedUpKind: UpKind?,
     selectedState: AbandonmentState?,
+    onSidoFilterClick: () -> Unit,
     onUpKindSelected: (UpKind?) -> Unit,
     onStateSelected: (AbandonmentState) -> Unit,
     modifier: Modifier = Modifier,
@@ -34,6 +37,16 @@ fun HomeFilterChipsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        FilterChip(
+            selected = selectedSido != null,
+            onClick = onSidoFilterClick,
+            label = {
+                Text(
+                    text = selectedSido?.name ?: stringResource(R.string.home_filter_sido),
+                )
+            },
+            colors = filterChipColors(),
+        )
         FilterChip(
             selected = selectedUpKind == null,
             onClick = { onUpKindSelected(null) },

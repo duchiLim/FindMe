@@ -27,7 +27,6 @@ import coil.compose.AsyncImage
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
 import com.greenbee.findme.presentation.ui.theme.FindMeBackground
-import com.greenbee.findme.presentation.ui.theme.FindMeOnPrimary
 
 @Composable
 fun AnimalCard(
@@ -93,25 +92,11 @@ fun AnimalCard(
                 modifier = Modifier.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(
-                    text = animal.kindName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                AnimalKindTitleRow(
+                    kindName = animal.kindName,
+                    processState = animal.processState,
+                    statusType = animal.statusType,
                 )
-                Surface(
-                    color = animal.statusType.color,
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    Text(
-                        text = animal.processState,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = FindMeOnPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
                 Text(
                     text = animal.shelterName,
                     style = MaterialTheme.typography.bodySmall,

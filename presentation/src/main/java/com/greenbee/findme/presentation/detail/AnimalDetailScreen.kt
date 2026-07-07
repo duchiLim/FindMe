@@ -20,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -41,7 +40,7 @@ import com.greenbee.findme.presentation.detail.component.AnimalDetailGallery
 import com.greenbee.findme.presentation.detail.component.DetailInfoRow
 import com.greenbee.findme.presentation.detail.component.DetailSectionCard
 import com.greenbee.findme.presentation.detail.model.AnimalDetailUiModel
-import com.greenbee.findme.presentation.ui.theme.FindMeOnPrimary
+import com.greenbee.findme.presentation.home.component.AnimalKindTitleRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,11 +57,18 @@ fun AnimalDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = uiState.animal?.kindName ?: stringResource(R.string.home_detail_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    val animal = uiState.animal
+                    if (animal != null) {
+                        AnimalKindTitleRow(
+                            kindName = animal.kindName,
+                            processState = animal.processState,
+                            statusType = animal.statusType,
+                            titleStyle = MaterialTheme.typography.titleLarge,
+                            attachStatusToKindName = true,
+                        )
+                    } else {
+                        Text(stringResource(R.string.home_detail_title))
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -167,20 +173,6 @@ private fun AnimalDetailContent(
                     imageUrls = animal.imageUrls,
                     contentDescription = animal.kindName,
                 )
-            }
-
-            item(key = "status") {
-                Surface(
-                    color = animal.statusType.color,
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text(
-                        text = animal.processState,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = FindMeOnPrimary,
-                    )
-                }
             }
 
             item(key = "basic") {

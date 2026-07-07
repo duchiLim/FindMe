@@ -100,7 +100,7 @@
 | 찜(♡) | 🔲 | ✅ |
 | 더보기(⋮) | 🔲 | 공유, 신고 등 |
 
-- 타이틀이 길면 `[개] 믹스견` 형태 그대로 표시 (API `kindCd` 문자열)
+- 타이틀에는 API `kindNm` 품종명 표시 (예: `믹스견`)
 - `navigationIcon`: Material Icons Rounded `ArrowBack`
 
 ### 3.2 사진 갤러리

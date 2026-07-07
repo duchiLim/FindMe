@@ -18,7 +18,7 @@ internal fun AbandonmentItemDto.toDomain(): AbandonedAnimal? {
     return AbandonedAnimal(
         desertionNo = id,
         happenPlace = happenPlace.orEmpty(),
-        kindName = kindCd.orEmpty(),
+        kindName = kindNm.orEmpty(),
         color = colorCd.orEmpty(),
         age = age.orEmpty(),
         weight = weight.orEmpty(),

@@ -103,6 +103,7 @@ data class AbandonmentItemDto(
     @SerialName("desertionNo") val desertionNo: String? = null,
     @SerialName("happenPlace") val happenPlace: String? = null,
     @SerialName("kindCd") val kindCd: String? = null,
+    @SerialName("kindNm") val kindNm: String? = null,
     @SerialName("colorCd") val colorCd: String? = null,
     @SerialName("age") val age: String? = null,
     @SerialName("weight") val weight: String? = null,

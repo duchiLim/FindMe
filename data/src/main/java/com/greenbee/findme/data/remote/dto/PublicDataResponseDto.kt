@@ -154,4 +154,7 @@ data class AbandonmentItemDto(
     @SerialName("specialMark") val specialMark: String? = null,
     @SerialName("sexCd") val sexCd: String? = null,
     @SerialName("neuterYn") val neuterYn: String? = null,
+    @SerialName("happenDt") val happenDt: String? = null,
+    @SerialName("noticeSdt") val noticeSdt: String? = null,
+    @SerialName("noticeEdt") val noticeEdt: String? = null,
 )

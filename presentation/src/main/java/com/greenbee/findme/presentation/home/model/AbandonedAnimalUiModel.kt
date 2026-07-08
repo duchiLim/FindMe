@@ -14,6 +14,12 @@ data class AbandonedAnimalUiModel(
     val shelterName: String,
     val imageUrls: List<String>,
     val statusType: ProcessStateType,
+    val happenDate: String = "",
+    val noticeStartDate: String = "",
+    val noticeEndDate: String = "",
+    val specialMark: String = "",
+    val happenPlace: String = "",
+    val color: String = "",
 )
 
 enum class ProcessStateType {
@@ -40,6 +46,12 @@ fun AbandonedAnimal.toUiModel(): AbandonedAnimalUiModel =
         shelterName = shelterName.ifBlank { "보호소 정보 없음" },
         imageUrls = imageUrls,
         statusType = processState.toProcessStateType(),
+        happenDate = happenDate,
+        noticeStartDate = noticeStartDate,
+        noticeEndDate = noticeEndDate,
+        specialMark = specialMark,
+        happenPlace = happenPlace,
+        color = color,
     )
 
 fun String.toProcessStateType(): ProcessStateType {

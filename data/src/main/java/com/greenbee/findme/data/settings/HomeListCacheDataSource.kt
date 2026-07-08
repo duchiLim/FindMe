@@ -67,6 +67,9 @@ private data class CachedAbandonedAnimalDto(
     val specialMark: String,
     val sex: String,
     val neuterYn: String,
+    val happenDate: String = "",
+    val noticeStartDate: String = "",
+    val noticeEndDate: String = "",
 )
 
 private fun HomeListCacheDto.toDomain(): HomeListCache =
@@ -91,6 +94,9 @@ private fun AbandonedAnimal.toDto(): CachedAbandonedAnimalDto =
         specialMark = specialMark,
         sex = sex,
         neuterYn = neuterYn,
+        happenDate = happenDate,
+        noticeStartDate = noticeStartDate,
+        noticeEndDate = noticeEndDate,
     )
 
 private fun CachedAbandonedAnimalDto.toDomain(): AbandonedAnimal =
@@ -108,4 +114,7 @@ private fun CachedAbandonedAnimalDto.toDomain(): AbandonedAnimal =
         specialMark = specialMark,
         sex = sex,
         neuterYn = neuterYn,
+        happenDate = happenDate,
+        noticeStartDate = noticeStartDate,
+        noticeEndDate = noticeEndDate,
     )

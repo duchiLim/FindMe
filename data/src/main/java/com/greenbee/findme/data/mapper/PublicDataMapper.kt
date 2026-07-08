@@ -30,6 +30,9 @@ internal fun AbandonmentItemDto.toDomain(): AbandonedAnimal? {
         specialMark = specialMark.orEmpty(),
         sex = sexCd.orEmpty(),
         neuterYn = neuterYn.orEmpty(),
+        happenDate = happenDt.orEmpty(),
+        noticeStartDate = noticeSdt.orEmpty(),
+        noticeEndDate = noticeEdt.orEmpty(),
     )
 }
 

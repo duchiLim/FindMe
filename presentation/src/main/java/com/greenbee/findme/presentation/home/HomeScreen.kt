@@ -15,18 +15,25 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -36,7 +43,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
@@ -49,10 +58,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.component.AnimalCard
 import com.greenbee.findme.presentation.home.component.HomeAdvancedFilterBottomSheet
+import com.greenbee.findme.presentation.home.component.HomeCurationSection
 import com.greenbee.findme.presentation.home.component.HomeFilterBar
 import com.greenbee.findme.presentation.home.component.HomeGridSkeleton
 import com.greenbee.findme.presentation.home.component.HomeRegionFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomSheet
+import com.greenbee.findme.presentation.home.model.HomeSortOrder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +78,7 @@ fun HomeScreen(
     val gridState = rememberLazyGridState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    var isSortMenuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.favoriteSnackbar) {
         when (uiState.favoriteSnackbar) {
@@ -116,33 +128,102 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.home_screen_title)) },
-                actions = {
-                    if (uiState.isRecentViewingEnabled) {
-                        IconButton(onClick = onNavigateToRecent) {
-                            Icon(
-                                imageVector = Icons.Rounded.Visibility,
-                                contentDescription = stringResource(R.string.home_recent_menu),
-                            )
-                        }
-                    }
-                    BadgedBox(
-                        badge = {
-                            if (uiState.activeAdvancedFilterCount > 0) {
-                                Badge { Text(uiState.activeAdvancedFilterCount.toString()) }
+            Column {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.home_screen_title)) },
+                    actions = {
+                        if (uiState.isRecentViewingEnabled) {
+                            IconButton(onClick = onNavigateToRecent) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Visibility,
+                                    contentDescription = stringResource(R.string.home_recent_menu),
+                                )
                             }
-                        },
-                    ) {
-                        IconButton(onClick = viewModel::onAdvancedFilterClick) {
-                            Icon(
-                                imageVector = Icons.Rounded.FilterList,
-                                contentDescription = stringResource(R.string.home_filter_menu),
-                            )
                         }
-                    }
-                },
-            )
+                        if (uiState.animals.isNotEmpty()) {
+                            IconButton(onClick = { isSortMenuExpanded = true }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.MoreVert,
+                                    contentDescription = stringResource(R.string.home_sort_menu),
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = isSortMenuExpanded,
+                                onDismissRequest = { isSortMenuExpanded = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.home_sort_latest)) },
+                                    onClick = {
+                                        isSortMenuExpanded = false
+                                        viewModel.setSortOrder(HomeSortOrder.LATEST)
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.home_sort_notice_end)) },
+                                    onClick = {
+                                        isSortMenuExpanded = false
+                                        viewModel.setSortOrder(HomeSortOrder.NOTICE_END_SOON)
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.home_sort_status)) },
+                                    onClick = {
+                                        isSortMenuExpanded = false
+                                        viewModel.setSortOrder(HomeSortOrder.STATUS_NOTICE_FIRST)
+                                    },
+                                )
+                            }
+                        }
+                        BadgedBox(
+                            badge = {
+                                if (uiState.activeAdvancedFilterCount > 0) {
+                                    Badge { Text(uiState.activeAdvancedFilterCount.toString()) }
+                                }
+                            },
+                        ) {
+                            IconButton(onClick = viewModel::onAdvancedFilterClick) {
+                                Icon(
+                                    imageVector = Icons.Rounded.FilterList,
+                                    contentDescription = stringResource(R.string.home_filter_menu),
+                                )
+                            }
+                        }
+                    },
+                )
+                SearchBar(
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = uiState.searchQuery,
+                            onQueryChange = viewModel::onSearchQueryChange,
+                            onSearch = {},
+                            expanded = false,
+                            onExpandedChange = {},
+                            placeholder = { Text(stringResource(R.string.home_search_hint)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Search,
+                                    contentDescription = null,
+                                )
+                            },
+                            trailingIcon = {
+                                if (uiState.searchQuery.isNotBlank()) {
+                                    IconButton(onClick = viewModel::clearSearch) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Close,
+                                            contentDescription = stringResource(R.string.home_search_clear),
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    },
+                    expanded = false,
+                    onExpandedChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                ) {}
+            }
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -212,6 +293,7 @@ fun HomeScreen(
                 onFavoriteToggle = viewModel::toggleFavorite,
                 onRetry = viewModel::retry,
                 onClearFilters = viewModel::clearFilters,
+                onClearSearch = viewModel::clearSearch,
             )
         }
     }
@@ -226,6 +308,7 @@ private fun HomeContent(
     onFavoriteToggle: (String) -> Unit,
     onRetry: () -> Unit,
     onClearFilters: () -> Unit,
+    onClearSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -261,6 +344,15 @@ private fun HomeContent(
                 )
             }
 
+            uiState.isSearchEmpty -> {
+                HomeMessageContent(
+                    message = stringResource(R.string.home_search_empty),
+                    actionLabel = stringResource(R.string.home_search_clear),
+                    onAction = onClearSearch,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+
             uiState.isEmpty && !uiState.isFilterLoading -> {
                 HomeMessageContent(
                     message = stringResource(R.string.home_empty),
@@ -286,12 +378,40 @@ private fun HomeContent(
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         HomeResultSummary(
                             totalCount = uiState.totalCount,
+                            displayCount = uiState.displayAnimals.size,
                             filterSummary = uiState.filterSummary,
+                            searchQuery = uiState.searchQuery,
+                            sortOrder = uiState.sortOrder,
                         )
                     }
 
+                    if (uiState.todayRegisteredAnimals.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            HomeCurationSection(
+                                title = stringResource(R.string.home_curation_today),
+                                animals = uiState.todayRegisteredAnimals,
+                                favoriteDesertionNos = uiState.favoriteDesertionNos,
+                                onAnimalClick = onAnimalClick,
+                                onFavoriteToggle = onFavoriteToggle,
+                            )
+                        }
+                    }
+
+                    if (uiState.adoptionImminentAnimals.isNotEmpty()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            HomeCurationSection(
+                                title = stringResource(R.string.home_curation_imminent),
+                                animals = uiState.adoptionImminentAnimals,
+                                favoriteDesertionNos = uiState.favoriteDesertionNos,
+                                onAnimalClick = onAnimalClick,
+                                onFavoriteToggle = onFavoriteToggle,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+
                     items(
-                        items = uiState.animals,
+                        items = uiState.displayAnimals,
                         key = { it.desertionNo },
                     ) { animal ->
                         AnimalCard(
@@ -324,7 +444,10 @@ private fun HomeContent(
 @Composable
 private fun HomeResultSummary(
     totalCount: Int,
+    displayCount: Int,
     filterSummary: String,
+    searchQuery: String,
+    sortOrder: HomeSortOrder,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -334,12 +457,30 @@ private fun HomeResultSummary(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = stringResource(R.string.home_total_count, totalCount),
+            text = if (searchQuery.isNotBlank()) {
+                stringResource(R.string.home_search_result_count, displayCount)
+            } else {
+                stringResource(R.string.home_total_count, totalCount)
+            },
             style = MaterialTheme.typography.titleMedium,
         )
-        if (filterSummary.isNotBlank()) {
+        val sortLabel = when (sortOrder) {
+            HomeSortOrder.LATEST -> null
+            HomeSortOrder.NOTICE_END_SOON -> stringResource(R.string.home_sort_notice_end)
+            HomeSortOrder.STATUS_NOTICE_FIRST -> stringResource(R.string.home_sort_status)
+        }
+        val summaryParts = buildList {
+            if (searchQuery.isNotBlank()) {
+                add("\"$searchQuery\"")
+            }
+            if (filterSummary.isNotBlank()) {
+                add(filterSummary)
+            }
+            sortLabel?.let(::add)
+        }
+        if (summaryParts.isNotEmpty()) {
             Text(
-                text = filterSummary,
+                text = summaryParts.joinToString(separator = " · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

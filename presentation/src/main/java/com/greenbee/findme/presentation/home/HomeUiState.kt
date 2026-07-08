@@ -5,6 +5,12 @@ import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
 import com.greenbee.findme.presentation.home.model.HomeDateRange
+import com.greenbee.findme.presentation.home.model.HomeSortOrder
+import com.greenbee.findme.presentation.home.model.filterBySearch
+import com.greenbee.findme.presentation.home.model.isAdoptionImminent
+import com.greenbee.findme.presentation.home.model.isRegisteredToday
+import com.greenbee.findme.presentation.home.model.HOME_CURATION_LIMIT
+import com.greenbee.findme.presentation.home.model.sortedBy
 
 data class HomeUiState(
     val isLoading: Boolean = true,
@@ -38,7 +44,29 @@ data class HomeUiState(
     val favoriteDesertionNos: Set<String> = emptySet(),
     val favoriteSnackbar: HomeFavoriteSnackbar? = null,
     val isRecentViewingEnabled: Boolean = true,
+    val searchQuery: String = "",
+    val sortOrder: HomeSortOrder = HomeSortOrder.LATEST,
 ) {
+    val displayAnimals: List<AbandonedAnimalUiModel>
+        get() = animals.filterBySearch(searchQuery).sortedBy(sortOrder)
+
+    val isSearchEmpty: Boolean
+        get() = searchQuery.isNotBlank() && displayAnimals.isEmpty() && !isLoading && !isFilterLoading
+
+    val todayRegisteredAnimals: List<AbandonedAnimalUiModel>
+        get() = if (searchQuery.isNotBlank()) {
+            emptyList()
+        } else {
+            animals.filter { it.isRegisteredToday() }.take(HOME_CURATION_LIMIT)
+        }
+
+    val adoptionImminentAnimals: List<AbandonedAnimalUiModel>
+        get() = if (searchQuery.isNotBlank()) {
+            emptyList()
+        } else {
+            animals.filter { it.isAdoptionImminent() }.take(HOME_CURATION_LIMIT)
+        }
+
     val activeRegionFilterCount: Int
         get() = (if (selectedSido != null) 1 else 0) + (if (selectedSigungu != null) 1 else 0)
 

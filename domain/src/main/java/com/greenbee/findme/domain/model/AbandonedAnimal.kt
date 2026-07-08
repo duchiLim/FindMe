@@ -14,4 +14,7 @@ data class AbandonedAnimal(
     val specialMark: String,
     val sex: String,
     val neuterYn: String,
+    val happenDate: String = "",
+    val noticeStartDate: String = "",
+    val noticeEndDate: String = "",
 )

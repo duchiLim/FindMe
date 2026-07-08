@@ -18,6 +18,7 @@ import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.SaveHomeListCacheUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.home.model.HomeDateRange
+import com.greenbee.findme.presentation.home.model.HomeSortOrder
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -113,6 +114,18 @@ class HomeViewModel @Inject constructor(
     fun onFavoriteSnackbarShown() {
         pendingUndoFavorite = null
         _uiState.update { it.copy(favoriteSnackbar = null) }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    fun clearSearch() {
+        _uiState.update { it.copy(searchQuery = "") }
+    }
+
+    fun setSortOrder(sortOrder: HomeSortOrder) {
+        _uiState.update { it.copy(sortOrder = sortOrder) }
     }
 
     fun onStateSelected(state: AbandonmentState) {
@@ -304,6 +317,7 @@ class HomeViewModel @Inject constructor(
                 draftState = null,
                 draftDateRange = HomeDateRange.DAYS_30,
                 sigunguList = emptyList(),
+                searchQuery = "",
             )
         }
         loadAnimals(reset = true)

@@ -101,6 +101,13 @@
     <string name="shelter_detail_label_reg_no">등록번호</string>
     <string name="shelter_visit_notice">입양·임시보호·방문 전에는 보호소에 전화로 먼저 문의해 주세요.</string>
     <string name="my_recent_section_title">최근 본 동물</string>
+    <string name="my_recent_see_all">전체</string>
+    <string name="my_recent_screen_title">최근 본 동물</string>
+    <string name="my_recent_clear_all">전체 삭제</string>
+    <string name="my_recent_clear_confirm_title">최근 본 기록을 모두 삭제할까요?</string>
+    <string name="my_recent_clear_confirm_message">삭제한 기록은 복구할 수 없습니다.</string>
+    <string name="my_recent_delete_item">기록 삭제</string>
+    <string name="my_recent_disabled">최근 본 동물 기록이 꺼져 있어요.</string>
     <string name="my_recent_empty">아직 본 동물이 없어요</string>
     <string name="my_recent_empty_hint">상세 화면을 보면 여기에 표시돼요.</string>
     <string name="my_settings_section_title">설정</string>
@@ -109,6 +116,15 @@
     <string name="my_app_info_description">유기동물 입양·임시보호를 돕는 앱입니다.</string>
     <string name="my_data_source_title">데이터 출처</string>
     <string name="my_data_source_summary">농림축산식품부 공공데이터포털</string>
+    <string name="my_applications_title">입양·임보 신청 내역</string>
+    <string name="my_applications_menu_summary">준비 중</string>
+    <string name="my_applications_empty_title">아직 신청 내역이 없어요</string>
+    <string name="my_applications_empty_description">입양·임시보호 신청 기능은 준비 중입니다.</string>
+    <string name="my_favorite_shortcut_title">마음에 둔 동물</string>
+    <string name="my_notification_settings_title">알림 설정</string>
+    <string name="my_notification_settings_summary">푸시 알림은 추후 지원 예정입니다.</string>
+    <string name="my_recent_viewing_title">최근 본 동물 기록</string>
+    <string name="my_recent_viewing_summary">끄면 기록이 저장되지 않으며, 기존 기록도 삭제됩니다.</string>
     <string name="my_footer_version">FindMe v%1$s</string>
     <string name="my_dialog_close">닫기</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,24 +16,24 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Assignment
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,45 +51,15 @@ private const val DATA_GO_KR_URL = "https://www.data.go.kr/"
 @Composable
 fun MyScreen(
     onAnimalClick: (String) -> Unit,
+    onNavigateToRecent: () -> Unit,
+    onNavigateToAbout: () -> Unit,
+    onNavigateToApplications: () -> Unit,
+    onNavigateToFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var showAppInfoDialog by remember { mutableStateOf(false) }
-
-    if (showAppInfoDialog) {
-        AlertDialog(
-            onDismissRequest = { showAppInfoDialog = false },
-            title = { Text(stringResource(R.string.my_app_info_title)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.my_app_info_version,
-                            uiState.appVersionName,
-                            uiState.appVersionCode,
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Text(
-                        text = stringResource(R.string.my_app_info_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAppInfoDialog = false }) {
-                    Text(stringResource(R.string.my_dialog_close))
-                }
-            },
-        )
-    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -98,142 +69,226 @@ fun MyScreen(
             )
         },
     ) { innerPadding ->
-        when {
-            uiState.isLoading -> {
-                Box(
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentPadding = PaddingValues(bottom = 24.dp),
+        ) {
+            item {
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentAlignment = Alignment.Center,
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CircularProgressIndicator()
+                    Text(
+                        text = stringResource(R.string.my_recent_section_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    if (uiState.isRecentViewingEnabled && uiState.recentAnimals.isNotEmpty()) {
+                        TextButton(onClick = onNavigateToRecent) {
+                            Text(stringResource(R.string.my_recent_see_all))
+                        }
+                    }
                 }
             }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(bottom = 24.dp),
-                ) {
-                    item {
+            item {
+                when {
+                    !uiState.isRecentViewingEnabled -> {
                         Text(
-                            text = stringResource(R.string.my_recent_section_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 8.dp,
-                                bottom = 12.dp,
-                            ),
+                            text = stringResource(R.string.my_recent_disabled),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         )
                     }
 
-                    if (uiState.recentAnimals.isEmpty()) {
-                        item {
+                    uiState.recentAnimals.isEmpty() -> {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                             Text(
                                 text = stringResource(R.string.my_recent_empty),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             )
                             Text(
                                 text = stringResource(R.string.my_recent_empty_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                modifier = Modifier.padding(top = 4.dp),
                             )
                         }
-                    } else {
-                        item {
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                items(
-                                    items = uiState.recentAnimals,
-                                    key = { it.desertionNo },
-                                ) { animal ->
-                                    RecentAnimalCard(
-                                        animal = animal,
-                                        onClick = { onAnimalClick(animal.desertionNo) },
-                                    )
-                                }
+                    }
+
+                    else -> {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            items(
+                                items = uiState.recentAnimals,
+                                key = { it.desertionNo },
+                            ) { animal ->
+                                RecentAnimalCard(
+                                    animal = animal,
+                                    onClick = { onAnimalClick(animal.desertionNo) },
+                                )
                             }
                         }
                     }
-
-                    item {
-                        Text(
-                            text = stringResource(R.string.my_settings_section_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 24.dp,
-                                bottom = 8.dp,
-                            ),
-                        )
-                    }
-
-                    item {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.my_app_info_title)) },
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Info,
-                                    contentDescription = null,
-                                )
-                            },
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                                    contentDescription = null,
-                                )
-                            },
-                            modifier = Modifier.clickable { showAppInfoDialog = true },
-                        )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.my_data_source_title)) },
-                            supportingContent = {
-                                Text(stringResource(R.string.my_data_source_summary))
-                            },
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Public,
-                                    contentDescription = null,
-                                )
-                            },
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                                    contentDescription = null,
-                                )
-                            },
-                            modifier = Modifier.clickable {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DATA_GO_KR_URL))
-                                context.startActivity(intent)
-                            },
-                        )
-                    }
-
-                    item {
-                        Text(
-                            text = stringResource(
-                                R.string.my_footer_version,
-                                uiState.appVersionName,
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 24.dp, start = 16.dp, end = 16.dp),
-                        )
-                    }
                 }
+            }
+
+            item {
+                Text(
+                    text = stringResource(R.string.my_settings_section_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 24.dp,
+                        bottom = 8.dp,
+                    ),
+                )
+            }
+
+            item {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_app_info_title)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = onNavigateToAbout),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_data_source_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_data_source_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Public,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DATA_GO_KR_URL))
+                        context.startActivity(intent)
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_applications_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_applications_menu_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.Assignment,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = onNavigateToApplications),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_favorite_shortcut_title)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = onNavigateToFavorite),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_notification_settings_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_notification_settings_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Notifications,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = uiState.isNotificationEnabled,
+                            onCheckedChange = viewModel::onNotificationEnabledChange,
+                        )
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_recent_viewing_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_recent_viewing_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Visibility,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = uiState.isRecentViewingEnabled,
+                            onCheckedChange = viewModel::onRecentViewingEnabledChange,
+                        )
+                    },
+                )
+            }
+
+            item {
+                Text(
+                    text = stringResource(
+                        R.string.my_footer_version,
+                        uiState.appVersionName,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                )
             }
         }
     }

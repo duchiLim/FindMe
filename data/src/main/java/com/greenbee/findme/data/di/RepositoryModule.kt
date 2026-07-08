@@ -8,6 +8,7 @@ import com.greenbee.findme.data.repository.LocationRepositoryImpl
 import com.greenbee.findme.data.repository.RecentlyViewedRepositoryImpl
 import com.greenbee.findme.data.repository.RegionRepositoryImpl
 import com.greenbee.findme.data.repository.ShelterFavoriteRepositoryImpl
+import com.greenbee.findme.data.repository.UserSettingsRepositoryImpl
 import com.greenbee.findme.data.repository.ShelterRepositoryImpl
 import com.greenbee.findme.domain.repository.AbandonedAnimalRepository
 import com.greenbee.findme.domain.repository.AnimalKindRepository
@@ -17,6 +18,7 @@ import com.greenbee.findme.domain.repository.LocationRepository
 import com.greenbee.findme.domain.repository.RecentlyViewedRepository
 import com.greenbee.findme.domain.repository.RegionRepository
 import com.greenbee.findme.domain.repository.ShelterFavoriteRepository
+import com.greenbee.findme.domain.repository.UserSettingsRepository
 import com.greenbee.findme.domain.repository.ShelterRepository
 import dagger.Binds
 import dagger.Module
@@ -81,4 +83,10 @@ abstract class RepositoryModule {
     abstract fun bindShelterFavoriteRepository(
         impl: ShelterFavoriteRepositoryImpl,
     ): ShelterFavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserSettingsRepository(
+        impl: UserSettingsRepositoryImpl,
+    ): UserSettingsRepository
 }

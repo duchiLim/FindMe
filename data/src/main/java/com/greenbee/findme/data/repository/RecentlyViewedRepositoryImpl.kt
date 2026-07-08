@@ -19,6 +19,11 @@ class RecentlyViewedRepositoryImpl @Inject constructor(
             entities.map { it.toDomain() }
         }
 
+    override fun observeAllRecentlyViewed(): Flow<List<RecentlyViewedAnimal>> =
+        recentlyViewedDao.observeAll().map { entities ->
+            entities.map { it.toDomain() }
+        }
+
     override suspend fun recordView(animal: AbandonedAnimal) {
         val now = System.currentTimeMillis()
         val existing = recentlyViewedDao.getByDesertionNo(animal.desertionNo)
@@ -29,6 +34,21 @@ class RecentlyViewedRepositoryImpl @Inject constructor(
             recentlyViewedDao.update(entity)
         }
         trimToMax()
+    }
+
+    override suspend fun updateSnapshot(animal: AbandonedAnimal) {
+        val existing = recentlyViewedDao.getByDesertionNo(animal.desertionNo) ?: return
+        recentlyViewedDao.update(
+            animal.toRecentlyViewedEntity(viewedAt = existing.viewedAt),
+        )
+    }
+
+    override suspend fun removeRecentlyViewed(desertionNo: String) {
+        recentlyViewedDao.delete(desertionNo)
+    }
+
+    override suspend fun clearAll() {
+        recentlyViewedDao.deleteAll()
     }
 
     private suspend fun trimToMax() {

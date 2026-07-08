@@ -12,6 +12,9 @@ object FindMeRoute {
     const val ANIMAL_DETAIL = "animal/{desertionNo}"
     const val SHELTER_DETAIL = "shelter/{careRegNo}"
     const val SHELTER_ANIMALS = "shelter/{careRegNo}/animals?shelterName={shelterName}"
+    const val MY_ABOUT = "my/about"
+    const val MY_RECENT = "my/recent"
+    const val MY_APPLICATIONS = "my/applications"
 
     val topLevelRoutes = setOf(HOME, FAVORITE, SHELTER, MY)
 

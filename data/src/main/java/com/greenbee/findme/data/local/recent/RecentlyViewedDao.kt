@@ -13,6 +13,9 @@ interface RecentlyViewedDao {
     @Query("SELECT * FROM recently_viewed_animals ORDER BY viewedAt DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<RecentlyViewedEntity>>
 
+    @Query("SELECT * FROM recently_viewed_animals ORDER BY viewedAt DESC")
+    fun observeAll(): Flow<List<RecentlyViewedEntity>>
+
     @Query("SELECT * FROM recently_viewed_animals WHERE desertionNo = :desertionNo LIMIT 1")
     suspend fun getByDesertionNo(desertionNo: String): RecentlyViewedEntity?
 
@@ -36,4 +39,10 @@ interface RecentlyViewedDao {
         """,
     )
     suspend fun deleteOldest(count: Int)
+
+    @Query("DELETE FROM recently_viewed_animals WHERE desertionNo = :desertionNo")
+    suspend fun delete(desertionNo: String)
+
+    @Query("DELETE FROM recently_viewed_animals")
+    suspend fun deleteAll()
 }

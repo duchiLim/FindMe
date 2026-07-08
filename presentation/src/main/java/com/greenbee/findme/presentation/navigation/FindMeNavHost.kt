@@ -11,6 +11,9 @@ import androidx.navigation.navArgument
 import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
+import com.greenbee.findme.presentation.my.MyAboutScreen
+import com.greenbee.findme.presentation.my.MyApplicationsScreen
+import com.greenbee.findme.presentation.my.MyRecentScreen
 import com.greenbee.findme.presentation.my.MyScreen
 import com.greenbee.findme.presentation.shelter.ShelterDetailScreen
 import com.greenbee.findme.presentation.shelter.ShelterScreen
@@ -91,6 +94,60 @@ fun FindMeNavHost(
             MyScreen(
                 onAnimalClick = { desertionNo ->
                     navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+                onNavigateToRecent = {
+                    navController.navigate(FindMeRoute.MY_RECENT)
+                },
+                onNavigateToAbout = {
+                    navController.navigate(FindMeRoute.MY_ABOUT)
+                },
+                onNavigateToApplications = {
+                    navController.navigate(FindMeRoute.MY_APPLICATIONS)
+                },
+                onNavigateToFavorite = {
+                    navController.navigate(FindMeRoute.FAVORITE) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+            )
+        }
+        composable(FindMeRoute.MY_ABOUT) {
+            MyAboutScreen(
+                onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable(FindMeRoute.MY_RECENT) {
+            MyRecentScreen(
+                onBackClick = { navController.popBackStack() },
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+            )
+        }
+        composable(FindMeRoute.MY_APPLICATIONS) {
+            MyApplicationsScreen(
+                onBackClick = { navController.popBackStack() },
+                onBrowseHomeClick = {
+                    navController.navigate(FindMeRoute.HOME) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onBrowseFavoriteClick = {
+                    navController.navigate(FindMeRoute.FAVORITE) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 },
             )
         }

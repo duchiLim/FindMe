@@ -3,8 +3,11 @@ package com.greenbee.findme.presentation.my
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveRecentlyViewedUseCase
-import com.greenbee.findme.presentation.home.model.toUiModel
+import com.greenbee.findme.domain.usecase.SetNotificationEnabledUseCase
+import com.greenbee.findme.domain.usecase.SetRecentViewingEnabledUseCase
+import com.greenbee.findme.presentation.my.model.toRecentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -18,6 +21,9 @@ import kotlinx.coroutines.launch
 class MyViewModel @Inject constructor(
     @ApplicationContext context: Context,
     observeRecentlyViewedUseCase: ObserveRecentlyViewedUseCase,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase,
+    private val setNotificationEnabledUseCase: SetNotificationEnabledUseCase,
+    private val setRecentViewingEnabledUseCase: SetRecentViewingEnabledUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MyUiState())
@@ -31,10 +37,13 @@ class MyViewModel @Inject constructor(
             context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode.toInt()
         }.getOrDefault(0)
 
+        val settings = getUserSettingsUseCase()
         _uiState.update {
             it.copy(
                 appVersionName = versionName,
                 appVersionCode = versionCode,
+                isNotificationEnabled = settings.isNotificationEnabled,
+                isRecentViewingEnabled = settings.isRecentViewingEnabled,
             )
         }
 
@@ -42,11 +51,23 @@ class MyViewModel @Inject constructor(
             observeRecentlyViewedUseCase().collect { recentlyViewed ->
                 _uiState.update {
                     it.copy(
-                        recentAnimals = recentlyViewed.map { item -> item.animal.toUiModel() },
+                        recentAnimals = recentlyViewed.map { item -> item.toRecentUiModel() },
                         isLoading = false,
                     )
                 }
             }
+        }
+    }
+
+    fun onNotificationEnabledChange(enabled: Boolean) {
+        setNotificationEnabledUseCase(enabled)
+        _uiState.update { it.copy(isNotificationEnabled = enabled) }
+    }
+
+    fun onRecentViewingEnabledChange(enabled: Boolean) {
+        viewModelScope.launch {
+            setRecentViewingEnabledUseCase(enabled)
+            _uiState.update { it.copy(isRecentViewingEnabled = enabled) }
         }
     }
 }

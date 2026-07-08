@@ -7,7 +7,15 @@ import kotlinx.coroutines.flow.Flow
 interface RecentlyViewedRepository {
     fun observeRecentlyViewed(limit: Int = DEFAULT_PREVIEW_LIMIT): Flow<List<RecentlyViewedAnimal>>
 
+    fun observeAllRecentlyViewed(): Flow<List<RecentlyViewedAnimal>>
+
     suspend fun recordView(animal: AbandonedAnimal)
+
+    suspend fun updateSnapshot(animal: AbandonedAnimal)
+
+    suspend fun removeRecentlyViewed(desertionNo: String)
+
+    suspend fun clearAll()
 
     companion object {
         const val DEFAULT_PREVIEW_LIMIT = 10

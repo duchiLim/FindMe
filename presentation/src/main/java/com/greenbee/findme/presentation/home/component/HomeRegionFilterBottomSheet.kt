@@ -7,23 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -67,9 +57,9 @@ fun HomeRegionFilterBottomSheet(
             )
 
             if (isSidoListLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally))
             } else {
-                RegionDropdownField(
+                HomeRegionDropdownField(
                     label = stringResource(R.string.home_filter_sido),
                     selectedLabel = draftSido?.name ?: stringResource(R.string.home_filter_nationwide),
                     options = buildList {
@@ -80,7 +70,7 @@ fun HomeRegionFilterBottomSheet(
                 )
             }
 
-            RegionDropdownField(
+            HomeRegionDropdownField(
                 label = stringResource(R.string.home_filter_sigungu),
                 selectedLabel = when {
                     draftSido == null -> stringResource(R.string.home_filter_select_sido_first)
@@ -116,58 +106,6 @@ fun HomeRegionFilterBottomSheet(
                 ) {
                     Text(stringResource(R.string.home_filter_apply))
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun RegionDropdownField(
-    label: String,
-    selectedLabel: String,
-    options: List<Pair<String, Region?>>,
-    onOptionSelected: (Region?) -> Unit,
-    enabled: Boolean = true,
-    isLoading: Boolean = false,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded && enabled && !isLoading,
-        onExpandedChange = { if (enabled && !isLoading) expanded = it },
-    ) {
-        OutlinedTextField(
-            value = selectedLabel,
-            onValueChange = {},
-            readOnly = true,
-            enabled = enabled,
-            label = { Text(label) },
-            trailingIcon = {
-                if (isLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded && enabled && !isLoading,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEach { (name, region) ->
-                DropdownMenuItem(
-                    text = { Text(name) },
-                    onClick = {
-                        onOptionSelected(region)
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
             }
         }
     }

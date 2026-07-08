@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
@@ -98,10 +100,13 @@ fun AnimalCard(
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                         shape = RoundedCornerShape(8.dp),
                     ) {
-                        Text(
-                            text = "${animal.imageUrls.size}",
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
+                        Icon(
+                            imageVector = Icons.Outlined.Collections,
+                            contentDescription = stringResource(R.string.home_multiple_photos),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }

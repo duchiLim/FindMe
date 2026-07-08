@@ -13,17 +13,26 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,7 +47,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.component.AnimalCard
+import com.greenbee.findme.presentation.home.component.HomeAdvancedFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeFilterBar
+import com.greenbee.findme.presentation.home.component.HomeGridSkeleton
 import com.greenbee.findme.presentation.home.component.HomeRegionFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomSheet
 
@@ -47,6 +58,7 @@ import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomShe
 fun HomeScreen(
     onAnimalClick: (String) -> Unit,
     onNavigateToFavorite: () -> Unit,
+    onNavigateToRecent: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -101,6 +113,35 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.home_screen_title)) },
+                actions = {
+                    if (uiState.isRecentViewingEnabled) {
+                        IconButton(onClick = onNavigateToRecent) {
+                            Icon(
+                                imageVector = Icons.Rounded.Visibility,
+                                contentDescription = stringResource(R.string.home_recent_menu),
+                            )
+                        }
+                    }
+                    BadgedBox(
+                        badge = {
+                            if (uiState.activeAdvancedFilterCount > 0) {
+                                Badge { Text(uiState.activeAdvancedFilterCount.toString()) }
+                            }
+                        },
+                    ) {
+                        IconButton(onClick = viewModel::onAdvancedFilterClick) {
+                            Icon(
+                                imageVector = Icons.Rounded.FilterList,
+                                contentDescription = stringResource(R.string.home_filter_menu),
+                            )
+                        }
+                    }
+                },
+            )
+        },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             HomeFilterBar(
@@ -136,6 +177,27 @@ fun HomeScreen(
             onApply = viewModel::onApplyUpKindFilter,
         )
 
+        HomeAdvancedFilterBottomSheet(
+            visible = uiState.isAdvancedFilterSheetVisible,
+            sidoList = uiState.sidoList,
+            sigunguList = uiState.sigunguList,
+            draftSido = uiState.draftSido,
+            draftSigungu = uiState.draftSigungu,
+            draftUpKind = uiState.draftUpKind,
+            draftState = uiState.draftState,
+            draftDateRange = uiState.draftDateRange,
+            isSidoListLoading = uiState.isSidoListLoading,
+            isSigunguListLoading = uiState.isSigunguListLoading,
+            onDismiss = viewModel::onAdvancedFilterDismiss,
+            onDraftSidoSelected = viewModel::onDraftSidoSelected,
+            onDraftSigunguSelected = viewModel::onDraftSigunguSelected,
+            onDraftUpKindSelected = viewModel::onDraftUpKindSelected,
+            onDraftStateSelected = viewModel::onDraftStateSelected,
+            onDraftDateRangeSelected = viewModel::onDraftDateRangeSelected,
+            onReset = viewModel::onResetAdvancedFilterDraft,
+            onApply = viewModel::onApplyAdvancedFilter,
+        )
+
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = viewModel::refresh,
@@ -169,14 +231,23 @@ private fun HomeContent(
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
+        if (uiState.showOfflineBanner) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.errorContainer,
+            ) {
+                Text(
+                    text = stringResource(R.string.home_offline_banner),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        }
+
         when {
             uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+                HomeGridSkeleton(modifier = Modifier.fillMaxSize())
             }
 
             uiState.errorMessage != null && uiState.animals.isEmpty() -> {

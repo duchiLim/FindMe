@@ -22,6 +22,16 @@
     <string name="favorite_view_list">목록 보기</string>
     <string name="nav_shelter">보호소</string>
     <string name="nav_my">마이</string>
+    <string name="home_screen_title">유기동물</string>
+    <string name="home_filter_menu">필터</string>
+    <string name="home_filter_advanced_sheet_title">상세 필터</string>
+    <string name="home_filter_state">공고 상태</string>
+    <string name="home_filter_period">유기 기간</string>
+    <string name="home_filter_period_7">최근 7일</string>
+    <string name="home_filter_period_30">최근 30일</string>
+    <string name="home_filter_period_90">최근 90일</string>
+    <string name="home_offline_banner">네트워크에 연결할 수 없습니다. 저장된 목록을 표시합니다.</string>
+    <string name="home_recent_menu">최근 본 동물</string>
     <string name="home_filter_all">전체</string>
     <string name="home_filter_all_kind">모든 축종</string>
     <string name="home_filter_region">지역</string>
@@ -40,6 +50,7 @@
     <string name="home_filter_notice">공고중</string>
     <string name="home_filter_protect">보호중</string>
     <string name="home_total_count">유기동물 %1$d마리</string>
+    <string name="home_multiple_photos">사진 여러 장</string>
     <string name="home_empty">조건에 맞는 유기동물이 없습니다.</string>
     <string name="home_retry">다시 시도</string>
     <string name="home_reset_filter">필터 초기화</string>

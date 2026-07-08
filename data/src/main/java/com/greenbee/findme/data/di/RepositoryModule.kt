@@ -4,6 +4,7 @@ import com.greenbee.findme.data.repository.AbandonedAnimalRepositoryImpl
 import com.greenbee.findme.data.repository.AnimalKindRepositoryImpl
 import com.greenbee.findme.data.repository.FavoriteRepositoryImpl
 import com.greenbee.findme.data.repository.GeocodingRepositoryImpl
+import com.greenbee.findme.data.repository.HomeListCacheRepositoryImpl
 import com.greenbee.findme.data.repository.LocationRepositoryImpl
 import com.greenbee.findme.data.repository.RecentlyViewedRepositoryImpl
 import com.greenbee.findme.data.repository.RegionRepositoryImpl
@@ -14,6 +15,7 @@ import com.greenbee.findme.domain.repository.AbandonedAnimalRepository
 import com.greenbee.findme.domain.repository.AnimalKindRepository
 import com.greenbee.findme.domain.repository.FavoriteRepository
 import com.greenbee.findme.domain.repository.GeocodingRepository
+import com.greenbee.findme.domain.repository.HomeListCacheRepository
 import com.greenbee.findme.domain.repository.LocationRepository
 import com.greenbee.findme.domain.repository.RecentlyViewedRepository
 import com.greenbee.findme.domain.repository.RegionRepository
@@ -83,6 +85,12 @@ abstract class RepositoryModule {
     abstract fun bindShelterFavoriteRepository(
         impl: ShelterFavoriteRepositoryImpl,
     ): ShelterFavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHomeListCacheRepository(
+        impl: HomeListCacheRepositoryImpl,
+    ): HomeListCacheRepository
 
     @Binds
     @Singleton

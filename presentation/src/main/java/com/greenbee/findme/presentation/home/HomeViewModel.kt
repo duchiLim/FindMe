@@ -9,11 +9,15 @@ import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.domain.model.FavoriteAnimal
 import com.greenbee.findme.domain.usecase.FavoriteToggleResult
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalsUseCase
+import com.greenbee.findme.domain.usecase.GetHomeListCacheUseCase
 import com.greenbee.findme.domain.usecase.GetSidoListUseCase
 import com.greenbee.findme.domain.usecase.GetSigunguListUseCase
+import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
 import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
+import com.greenbee.findme.domain.usecase.SaveHomeListCacheUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
+import com.greenbee.findme.presentation.home.model.HomeDateRange
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -22,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -29,6 +35,9 @@ class HomeViewModel @Inject constructor(
     private val getSidoListUseCase: GetSidoListUseCase,
     private val getSigunguListUseCase: GetSigunguListUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
+    getUserSettingsUseCase: GetUserSettingsUseCase,
+    private val getHomeListCacheUseCase: GetHomeListCacheUseCase,
+    private val saveHomeListCacheUseCase: SaveHomeListCacheUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val restoreFavoriteUseCase: RestoreFavoriteUseCase,
 ) : ViewModel() {
@@ -40,9 +49,26 @@ class HomeViewModel @Inject constructor(
     private var isRequestInFlight = false
     private var rawFavorites: List<FavoriteAnimal> = emptyList()
     private var pendingUndoFavorite: FavoriteAnimal? = null
+    private var latestDomainAnimals: List<com.greenbee.findme.domain.model.AbandonedAnimal> = emptyList()
 
     init {
+        val settings = getUserSettingsUseCase()
+        _uiState.update { it.copy(isRecentViewingEnabled = settings.isRecentViewingEnabled) }
+
         loadSidoList()
+        viewModelScope.launch {
+            getHomeListCacheUseCase()?.let { cache ->
+                _uiState.update {
+                    it.copy(
+                        animals = cache.animals.map { animal -> animal.toUiModel() },
+                        totalCount = cache.totalCount,
+                        filterSummary = cache.filterSummary,
+                        isLoading = false,
+                    )
+                }
+                latestDomainAnimals = cache.animals
+            }
+        }
         loadAnimals(reset = true)
         viewModelScope.launch {
             observeFavoritesUseCase().collect { favorites ->
@@ -92,6 +118,69 @@ class HomeViewModel @Inject constructor(
     fun onStateSelected(state: AbandonmentState) {
         val nextState = if (_uiState.value.selectedState == state) null else state
         _uiState.update { it.copy(selectedState = nextState) }
+        loadAnimals(reset = true)
+    }
+
+    fun onAdvancedFilterClick() {
+        val state = _uiState.value
+        _uiState.update {
+            it.copy(
+                isAdvancedFilterSheetVisible = true,
+                draftSido = state.selectedSido,
+                draftSigungu = state.selectedSigungu,
+                draftUpKind = state.selectedUpKind,
+                draftState = state.selectedState,
+                draftDateRange = state.selectedDateRange,
+            )
+        }
+        state.selectedSido?.code?.let(::loadSigunguList)
+    }
+
+    fun onAdvancedFilterDismiss() {
+        _uiState.update {
+            it.copy(
+                isAdvancedFilterSheetVisible = false,
+                draftSido = it.selectedSido,
+                draftSigungu = it.selectedSigungu,
+                draftUpKind = it.selectedUpKind,
+                draftState = it.selectedState,
+                draftDateRange = it.selectedDateRange,
+            )
+        }
+    }
+
+    fun onDraftStateSelected(state: AbandonmentState?) {
+        _uiState.update { it.copy(draftState = state) }
+    }
+
+    fun onDraftDateRangeSelected(dateRange: HomeDateRange) {
+        _uiState.update { it.copy(draftDateRange = dateRange) }
+    }
+
+    fun onResetAdvancedFilterDraft() {
+        _uiState.update {
+            it.copy(
+                draftSido = null,
+                draftSigungu = null,
+                draftUpKind = null,
+                draftState = null,
+                draftDateRange = HomeDateRange.DAYS_30,
+                sigunguList = emptyList(),
+            )
+        }
+    }
+
+    fun onApplyAdvancedFilter() {
+        _uiState.update {
+            it.copy(
+                selectedSido = it.draftSido,
+                selectedSigungu = it.draftSigungu,
+                selectedUpKind = it.draftUpKind,
+                selectedState = it.draftState,
+                selectedDateRange = it.draftDateRange,
+                isAdvancedFilterSheetVisible = false,
+            )
+        }
         loadAnimals(reset = true)
     }
 
@@ -208,9 +297,12 @@ class HomeViewModel @Inject constructor(
                 selectedState = null,
                 selectedSido = null,
                 selectedSigungu = null,
+                selectedDateRange = HomeDateRange.DAYS_30,
                 draftSido = null,
                 draftSigungu = null,
                 draftUpKind = null,
+                draftState = null,
+                draftDateRange = HomeDateRange.DAYS_30,
                 sigunguList = emptyList(),
             )
         }
@@ -289,6 +381,22 @@ class HomeViewModel @Inject constructor(
                 val mergedAnimals = (if (reset) newAnimals else currentState.animals + newAnimals)
                     .distinctBy { it.desertionNo }
                 val canLoadMore = mergedAnimals.size < result.totalCount
+                latestDomainAnimals = if (reset) result.items else latestDomainAnimals + result.items
+                val filterSummary = buildFilterSummary(
+                    upKind = currentState.selectedUpKind,
+                    state = currentState.selectedState,
+                    sido = currentState.selectedSido,
+                    sigungu = currentState.selectedSigungu,
+                    dateRange = currentState.selectedDateRange,
+                )
+
+                if (reset) {
+                    saveHomeListCacheUseCase(
+                        animals = result.items,
+                        totalCount = result.totalCount,
+                        filterSummary = filterSummary,
+                    )
+                }
 
                 _uiState.update {
                     it.copy(
@@ -298,15 +406,11 @@ class HomeViewModel @Inject constructor(
                         isLoadingMore = false,
                         animals = mergedAnimals,
                         totalCount = result.totalCount,
-                        filterSummary = buildFilterSummary(
-                            upKind = it.selectedUpKind,
-                            state = it.selectedState,
-                            sido = it.selectedSido,
-                            sigungu = it.selectedSigungu,
-                        ),
+                        filterSummary = filterSummary,
                         canLoadMore = canLoadMore,
                         isEmpty = mergedAnimals.isEmpty(),
                         errorMessage = null,
+                        showOfflineBanner = false,
                     )
                 }
             }.onFailure { error ->
@@ -316,7 +420,12 @@ class HomeViewModel @Inject constructor(
                         isFilterLoading = false,
                         isRefreshing = false,
                         isLoadingMore = false,
-                        errorMessage = error.message ?: "유기동물 정보를 불러오지 못했습니다.",
+                        errorMessage = if (it.animals.isEmpty()) {
+                            error.message ?: "유기동물 정보를 불러오지 못했습니다."
+                        } else {
+                            null
+                        },
+                        showOfflineBanner = fromPullRefresh && it.animals.isNotEmpty(),
                     )
                 }
             }
@@ -325,21 +434,27 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun buildFilter(page: Int, state: HomeUiState): AbandonedAnimalFilter =
-        AbandonedAnimalFilter(
+    private fun buildFilter(page: Int, state: HomeUiState): AbandonedAnimalFilter {
+        val end = LocalDate.now()
+        val begin = end.minusDays(state.selectedDateRange.days.toLong())
+        return AbandonedAnimalFilter(
             pageNo = page,
             numOfRows = PAGE_SIZE,
+            beginDate = begin.format(DATE_FORMATTER),
+            endDate = end.format(DATE_FORMATTER),
             upKind = state.selectedUpKind,
             state = state.selectedState,
             sidoCode = state.selectedSido?.code,
             sigunguCode = state.selectedSigungu?.code,
         )
+    }
 
     private fun buildFilterSummary(
         upKind: UpKind?,
         state: AbandonmentState?,
         sido: Region?,
         sigungu: Region?,
+        dateRange: HomeDateRange,
     ): String = buildList {
         when {
             sigungu != null -> add(sigungu.name)
@@ -356,16 +471,24 @@ class HomeViewModel @Inject constructor(
             AbandonmentState.PROTECT -> add("보호중")
             null -> Unit
         }
-        add("최근 30일")
+        add(
+            when (dateRange) {
+                HomeDateRange.DAYS_7 -> "최근 7일"
+                HomeDateRange.DAYS_30 -> "최근 30일"
+                HomeDateRange.DAYS_90 -> "최근 90일"
+            },
+        )
     }.joinToString(separator = " · ")
 
     private fun hasActiveFilters(state: HomeUiState): Boolean =
         state.selectedUpKind != null ||
             state.selectedState != null ||
             state.selectedSido != null ||
-            state.selectedSigungu != null
+            state.selectedSigungu != null ||
+            state.selectedDateRange != HomeDateRange.DAYS_30
 
     private companion object {
         const val PAGE_SIZE = 20
+        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
     }
 }

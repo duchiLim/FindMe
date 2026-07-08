@@ -44,6 +44,9 @@ fun FindMeNavHost(
                         restoreState = true
                     }
                 },
+                onNavigateToRecent = {
+                    navController.navigate(FindMeRoute.MY_RECENT)
+                },
             )
         }
         composable(FindMeRoute.FAVORITE) {

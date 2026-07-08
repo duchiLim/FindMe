@@ -20,3 +20,20 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
     }
 }
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS favorite_shelters (
+                careRegNo TEXT NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                orgName TEXT NOT NULL,
+                tel TEXT NOT NULL,
+                address TEXT NOT NULL,
+                savedAt INTEGER NOT NULL
+            )
+            """.trimIndent(),
+        )
+    }
+}

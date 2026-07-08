@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.greenbee.findme.data.local.FindMeDatabase
 import com.greenbee.findme.data.local.MIGRATION_1_2
+import com.greenbee.findme.data.local.MIGRATION_2_3
 import com.greenbee.findme.data.local.favorite.FavoriteAnimalDao
+import com.greenbee.findme.data.local.favorite.FavoriteShelterDao
 import com.greenbee.findme.data.local.recent.RecentlyViewedDao
 import dagger.Module
 import dagger.Provides
@@ -26,12 +28,16 @@ object DatabaseModule {
         FindMeDatabase::class.java,
         "findme.db",
     )
-        .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
         .build()
 
     @Provides
     fun provideFavoriteAnimalDao(database: FindMeDatabase): FavoriteAnimalDao =
         database.favoriteAnimalDao()
+
+    @Provides
+    fun provideFavoriteShelterDao(database: FindMeDatabase): FavoriteShelterDao =
+        database.favoriteShelterDao()
 
     @Provides
     fun provideRecentlyViewedDao(database: FindMeDatabase): RecentlyViewedDao =

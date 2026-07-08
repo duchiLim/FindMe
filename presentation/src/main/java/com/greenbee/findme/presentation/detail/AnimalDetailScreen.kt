@@ -53,6 +53,7 @@ import com.greenbee.findme.presentation.ui.theme.FindMePrimaryVariant
 @Composable
 fun AnimalDetailScreen(
     onBackClick: () -> Unit,
+    onShelterClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnimalDetailViewModel = hiltViewModel(),
 ) {
@@ -71,6 +72,24 @@ fun AnimalDetailScreen(
                 viewModel.onFavoriteMessageShown()
             }
             null -> Unit
+        }
+    }
+
+    LaunchedEffect(uiState.navigateToShelterCareRegNo) {
+        uiState.navigateToShelterCareRegNo?.let { careRegNo ->
+            onShelterClick(careRegNo)
+            viewModel.onShelterNavigationHandled()
+        }
+    }
+
+    LaunchedEffect(uiState.showShelterNotFound) {
+        if (uiState.showShelterNotFound) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.shelter_lookup_not_found),
+                Toast.LENGTH_SHORT,
+            ).show()
+            viewModel.onShelterNotFoundShown()
         }
     }
 
@@ -180,6 +199,7 @@ fun AnimalDetailScreen(
                 AnimalDetailContent(
                     animal = uiState.animal!!,
                     isRefreshing = uiState.isRefreshing,
+                    onShelterNameClick = viewModel::onShelterNameClick,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
@@ -193,6 +213,7 @@ fun AnimalDetailScreen(
 private fun AnimalDetailContent(
     animal: AnimalDetailUiModel,
     isRefreshing: Boolean,
+    onShelterNameClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -258,6 +279,13 @@ private fun AnimalDetailContent(
                     DetailInfoRow(
                         label = stringResource(R.string.detail_label_shelter_name),
                         value = animal.shelterName,
+                        onValueClick = if (
+                            animal.shelterName.isNotBlank() && animal.shelterName != "보호소 정보 없음"
+                        ) {
+                            onShelterNameClick
+                        } else {
+                            null
+                        },
                     )
                     DetailInfoRow(
                         label = stringResource(R.string.detail_label_shelter_tel),

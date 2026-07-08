@@ -2,9 +2,7 @@ package com.greenbee.findme.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.greenbee.findme.presentation.R
 import androidx.navigation.NavType
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -14,7 +12,9 @@ import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
 import com.greenbee.findme.presentation.my.MyScreen
+import com.greenbee.findme.presentation.shelter.ShelterDetailScreen
 import com.greenbee.findme.presentation.shelter.ShelterScreen
+import com.greenbee.findme.presentation.shelter.animals.ShelterAnimalsScreen
 
 @Composable
 fun FindMeNavHost(
@@ -51,7 +51,41 @@ fun FindMeNavHost(
             )
         }
         composable(FindMeRoute.SHELTER) {
-            ShelterScreen()
+            ShelterScreen(
+                onShelterClick = { careRegNo ->
+                    navController.navigate(FindMeRoute.shelterDetail(careRegNo))
+                },
+            )
+        }
+        composable(
+            route = FindMeRoute.SHELTER_DETAIL,
+            arguments = listOf(
+                navArgument("careRegNo") { type = NavType.StringType },
+            ),
+        ) {
+            ShelterDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onNavigateToAnimals = { careRegNo, shelterName ->
+                    navController.navigate(FindMeRoute.shelterAnimals(careRegNo, shelterName))
+                },
+            )
+        }
+        composable(
+            route = FindMeRoute.SHELTER_ANIMALS,
+            arguments = listOf(
+                navArgument("careRegNo") { type = NavType.StringType },
+                navArgument("shelterName") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
+        ) {
+            ShelterAnimalsScreen(
+                onBackClick = { navController.popBackStack() },
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+            )
         }
         composable(FindMeRoute.MY) {
             MyScreen(
@@ -68,6 +102,9 @@ fun FindMeNavHost(
         ) {
             AnimalDetailScreen(
                 onBackClick = { navController.popBackStack() },
+                onShelterClick = { careRegNo ->
+                    navController.navigate(FindMeRoute.shelterDetail(careRegNo))
+                },
             )
         }
     }

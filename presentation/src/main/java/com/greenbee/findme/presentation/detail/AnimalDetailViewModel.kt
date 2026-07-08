@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.usecase.FavoriteToggleResult
+import com.greenbee.findme.domain.usecase.FindShelterByNameUseCase
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalDetailUseCase
 import com.greenbee.findme.domain.usecase.ObserveIsFavoriteUseCase
 import com.greenbee.findme.domain.usecase.RecordRecentlyViewedUseCase
@@ -24,6 +25,7 @@ class AnimalDetailViewModel @Inject constructor(
     private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val recordRecentlyViewedUseCase: RecordRecentlyViewedUseCase,
+    private val findShelterByNameUseCase: FindShelterByNameUseCase,
 ) : ViewModel() {
 
     private val desertionNo: String = savedStateHandle.get<String>("desertionNo").orEmpty()
@@ -66,6 +68,41 @@ class AnimalDetailViewModel @Inject constructor(
 
     fun onFavoriteMessageShown() {
         _uiState.update { it.copy(favoriteMessage = null) }
+    }
+
+    fun onShelterNameClick() {
+        val animal = _uiState.value.animal ?: return
+        if (animal.shelterName.isBlank() || animal.shelterName == "보호소 정보 없음") return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isShelterLookupLoading = true, showShelterNotFound = false) }
+            runCatching { findShelterByNameUseCase(animal.shelterName) }
+                .onSuccess { shelter ->
+                    _uiState.update {
+                        it.copy(
+                            isShelterLookupLoading = false,
+                            navigateToShelterCareRegNo = shelter?.careRegNo,
+                            showShelterNotFound = shelter == null,
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update {
+                        it.copy(
+                            isShelterLookupLoading = false,
+                            showShelterNotFound = true,
+                        )
+                    }
+                }
+        }
+    }
+
+    fun onShelterNavigationHandled() {
+        _uiState.update { it.copy(navigateToShelterCareRegNo = null) }
+    }
+
+    fun onShelterNotFoundShown() {
+        _uiState.update { it.copy(showShelterNotFound = false) }
     }
 
     private fun loadDetail(forceLoading: Boolean = false) {

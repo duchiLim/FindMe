@@ -2,6 +2,7 @@ package com.greenbee.findme.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 @Serializable
 data class PublicDataResponseDto<T>(
@@ -67,11 +68,49 @@ private object ShelterItemListSerializer : FlexibleItemListSerializer<ShelterIte
 
 @Serializable
 data class ShelterItemDto(
-    @SerialName("careRegNo") val careRegNo: String? = null,
-    @SerialName("careNm") val careName: String? = null,
-    @SerialName("orgNm") val orgName: String? = null,
-    @SerialName("careTel") val careTel: String? = null,
-    @SerialName("careAddr") val careAddr: String? = null,
+    @SerialName("careRegNo")
+    @JsonNames("careRegNo", "care_reg_no")
+    val careRegNo: String? = null,
+    @SerialName("careNm")
+    @JsonNames("careNm", "care_nm")
+    val careName: String? = null,
+    @SerialName("orgNm")
+    @JsonNames("orgNm", "org_nm")
+    val orgName: String? = null,
+    @SerialName("careTel")
+    @JsonNames("careTel", "care_tel")
+    val careTel: String? = null,
+    @SerialName("careAddr")
+    @JsonNames("careAddr", "care_addr")
+    val careAddr: String? = null,
+)
+
+@Serializable
+data class ShelterInfoItemsDto(
+    @Serializable(with = ShelterInfoItemListSerializer::class)
+    val item: List<ShelterInfoItemDto> = emptyList(),
+)
+
+private object ShelterInfoItemListSerializer :
+    FlexibleItemListSerializer<ShelterInfoItemDto>(ShelterInfoItemDto.serializer())
+
+@Serializable
+data class ShelterInfoItemDto(
+    @SerialName("careRegNo")
+    @JsonNames("careRegNo", "care_reg_no")
+    val careRegNo: String? = null,
+    @SerialName("careNm")
+    @JsonNames("careNm", "care_nm")
+    val careName: String? = null,
+    @SerialName("orgNm")
+    @JsonNames("orgNm", "org_nm")
+    val orgName: String? = null,
+    @SerialName("careTel")
+    @JsonNames("careTel", "care_tel")
+    val careTel: String? = null,
+    @SerialName("careAddr")
+    @JsonNames("careAddr", "care_addr")
+    val careAddr: String? = null,
 )
 
 @Serializable

@@ -1,5 +1,6 @@
 package com.greenbee.findme.presentation.detail.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ fun DetailInfoRow(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    onValueClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -60,7 +62,20 @@ fun DetailInfoRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(0.65f),
+            color = if (onValueClick != null) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+            modifier = Modifier
+                .weight(0.65f)
+                .then(
+                    if (onValueClick != null) {
+                        Modifier.clickable(onClick = onValueClick)
+                    } else {
+                        Modifier
+                    },
+                ),
         )
     }
 }

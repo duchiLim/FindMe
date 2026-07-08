@@ -34,6 +34,7 @@ class AbandonedAnimalRepositoryImpl @Inject constructor(
                 sigunguCode = resolvedFilter.sigunguCode,
                 state = resolvedFilter.state?.apiValue,
                 desertionNo = resolvedFilter.desertionNo,
+                careRegNo = resolvedFilter.careRegNo,
             )
         }
 

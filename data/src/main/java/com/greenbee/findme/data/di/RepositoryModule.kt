@@ -3,14 +3,20 @@ package com.greenbee.findme.data.di
 import com.greenbee.findme.data.repository.AbandonedAnimalRepositoryImpl
 import com.greenbee.findme.data.repository.AnimalKindRepositoryImpl
 import com.greenbee.findme.data.repository.FavoriteRepositoryImpl
+import com.greenbee.findme.data.repository.GeocodingRepositoryImpl
+import com.greenbee.findme.data.repository.LocationRepositoryImpl
 import com.greenbee.findme.data.repository.RecentlyViewedRepositoryImpl
 import com.greenbee.findme.data.repository.RegionRepositoryImpl
+import com.greenbee.findme.data.repository.ShelterFavoriteRepositoryImpl
 import com.greenbee.findme.data.repository.ShelterRepositoryImpl
 import com.greenbee.findme.domain.repository.AbandonedAnimalRepository
 import com.greenbee.findme.domain.repository.AnimalKindRepository
 import com.greenbee.findme.domain.repository.FavoriteRepository
+import com.greenbee.findme.domain.repository.GeocodingRepository
+import com.greenbee.findme.domain.repository.LocationRepository
 import com.greenbee.findme.domain.repository.RecentlyViewedRepository
 import com.greenbee.findme.domain.repository.RegionRepository
+import com.greenbee.findme.domain.repository.ShelterFavoriteRepository
 import com.greenbee.findme.domain.repository.ShelterRepository
 import dagger.Binds
 import dagger.Module
@@ -57,4 +63,22 @@ abstract class RepositoryModule {
     abstract fun bindRecentlyViewedRepository(
         impl: RecentlyViewedRepositoryImpl,
     ): RecentlyViewedRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGeocodingRepository(
+        impl: GeocodingRepositoryImpl,
+    ): GeocodingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationRepository(
+        impl: LocationRepositoryImpl,
+    ): LocationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindShelterFavoriteRepository(
+        impl: ShelterFavoriteRepositoryImpl,
+    ): ShelterFavoriteRepository
 }

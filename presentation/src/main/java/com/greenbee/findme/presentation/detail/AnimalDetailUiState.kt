@@ -15,4 +15,7 @@ data class AnimalDetailUiState(
     val favoriteMessage: FavoriteMessage? = null,
     val errorMessage: String? = null,
     val isNotFound: Boolean = false,
+    val isShelterLookupLoading: Boolean = false,
+    val navigateToShelterCareRegNo: String? = null,
+    val showShelterNotFound: Boolean = false,
 )

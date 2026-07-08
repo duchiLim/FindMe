@@ -3,6 +3,7 @@ package com.greenbee.findme.data.di
 import android.util.Log
 import com.greenbee.findme.data.BuildConfig
 import com.greenbee.findme.data.remote.AbandonmentPublicApi
+import com.greenbee.findme.data.remote.AnimalShelterApi
 import com.greenbee.findme.data.remote.interceptor.HttpErrorLoggingInterceptor
 import com.greenbee.findme.data.remote.NetworkLogRedactor
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -11,6 +12,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,6 +25,7 @@ import retrofit2.Retrofit
 object NetworkModule {
 
     private const val BASE_URL = "http://apis.data.go.kr/1543061/abandonmentPublicService_v2/"
+    private const val ANIMAL_SHELTER_BASE_URL = "http://apis.data.go.kr/1543061/animalShelterSrvc_v2/"
     private val jsonMediaType = "application/json".toMediaType()
 
     @Provides
@@ -71,6 +74,28 @@ object NetworkModule {
     fun provideAbandonmentPublicApi(retrofit: Retrofit): AbandonmentPublicApi =
         retrofit.create(AbandonmentPublicApi::class.java)
 
+    @Provides
+    @Singleton
+    @AnimalShelterRetrofit
+    fun provideAnimalShelterRetrofit(
+        okHttpClient: OkHttpClient,
+        json: Json,
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(ANIMAL_SHELTER_BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(json.asConverterFactory(jsonMediaType))
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideAnimalShelterApi(
+        @AnimalShelterRetrofit retrofit: Retrofit,
+    ): AnimalShelterApi = retrofit.create(AnimalShelterApi::class.java)
+
     private const val TIMEOUT_SECONDS = 30L
     private const val NETWORK_LOG_TAG = "FindMe-Network"
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AnimalShelterRetrofit

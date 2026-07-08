@@ -3,6 +3,7 @@ package com.greenbee.findme.data.mapper
 import com.greenbee.findme.data.remote.dto.AbandonmentItemDto
 import com.greenbee.findme.data.remote.dto.KindItemDto
 import com.greenbee.findme.data.remote.dto.PublicDataContentDto
+import com.greenbee.findme.data.remote.dto.ShelterInfoItemDto
 import com.greenbee.findme.data.remote.dto.ShelterItemDto
 import com.greenbee.findme.data.remote.dto.SidoItemDto
 import com.greenbee.findme.data.remote.dto.SigunguItemDto
@@ -64,6 +65,24 @@ internal fun ShelterItemDto.toDomain(): Shelter? {
         address = careAddr.orEmpty(),
     )
 }
+
+internal fun ShelterInfoItemDto.toDomain(): Shelter? {
+    val regNo = careRegNo?.takeIf { it.isNotBlank() } ?: return null
+    return Shelter(
+        careRegNo = regNo,
+        name = careName.orEmpty(),
+        orgName = orgName.orEmpty(),
+        tel = careTel.orEmpty(),
+        address = careAddr.orEmpty(),
+    )
+}
+
+internal fun Shelter.mergeWithDetail(detail: Shelter): Shelter = copy(
+    name = detail.name.ifBlank { name },
+    orgName = detail.orgName.ifBlank { orgName },
+    tel = detail.tel.ifBlank { tel },
+    address = detail.address.ifBlank { address },
+)
 
 internal fun KindItemDto.toDomain(): AnimalKind? {
     val kindCode = code?.takeIf { it.isNotBlank() } ?: return null

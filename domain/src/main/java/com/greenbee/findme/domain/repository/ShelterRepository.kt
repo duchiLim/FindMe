@@ -10,4 +10,8 @@ interface ShelterRepository {
         pageNo: Int = 1,
         numOfRows: Int = 100,
     ): PagedResult<Shelter>
+
+    suspend fun getShelter(careRegNo: String): Shelter?
+
+    suspend fun findShelterByName(name: String): Shelter?
 }

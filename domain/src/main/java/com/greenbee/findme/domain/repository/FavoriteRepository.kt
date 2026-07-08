@@ -11,9 +11,11 @@ interface FavoriteRepository {
 
     suspend fun isFavorite(desertionNo: String): Boolean
 
-    suspend fun addFavorite(animal: AbandonedAnimal)
+    suspend fun addFavorite(animal: AbandonedAnimal, savedAt: Long = System.currentTimeMillis())
 
     suspend fun removeFavorite(desertionNo: String)
 
     suspend fun updateFavoriteSnapshot(animal: AbandonedAnimal)
+
+    suspend fun markNoticeUnavailable(desertionNo: String)
 }

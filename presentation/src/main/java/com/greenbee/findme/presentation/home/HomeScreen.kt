@@ -21,10 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,11 +46,41 @@ import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomShe
 @Composable
 fun HomeScreen(
     onAnimalClick: (String) -> Unit,
+    onNavigateToFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.favoriteSnackbar) {
+        when (uiState.favoriteSnackbar) {
+            HomeFavoriteSnackbar.ADDED -> {
+                val result = snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.favorite_added_message),
+                    actionLabel = context.getString(R.string.favorite_view_list),
+                )
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                    onNavigateToFavorite()
+                }
+                viewModel.onFavoriteSnackbarShown()
+            }
+            HomeFavoriteSnackbar.REMOVED -> {
+                val result = snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.favorite_removed_message),
+                    actionLabel = context.getString(R.string.favorite_undo),
+                )
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                    viewModel.undoRemoveFavorite()
+                } else {
+                    viewModel.onFavoriteSnackbarShown()
+                }
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(gridState, uiState.canLoadMore, uiState.isLoading, uiState.isFilterLoading, uiState.isLoadingMore, uiState.animals.size) {
         if (uiState.isLoading || uiState.isFilterLoading || uiState.animals.isEmpty() || !uiState.canLoadMore) {
@@ -63,8 +98,12 @@ fun HomeScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        HomeFilterBar(
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            HomeFilterBar(
             activeRegionFilterCount = uiState.activeRegionFilterCount,
             selectedUpKind = uiState.selectedUpKind,
             selectedState = uiState.selectedState,
@@ -106,10 +145,12 @@ fun HomeScreen(
                 uiState = uiState,
                 gridState = gridState,
                 onAnimalClick = onAnimalClick,
+                onFavoriteToggle = viewModel::toggleFavorite,
                 onRetry = viewModel::retry,
                 onClearFilters = viewModel::clearFilters,
             )
         }
+    }
     }
 }
 
@@ -118,6 +159,7 @@ private fun HomeContent(
     uiState: HomeUiState,
     gridState: LazyGridState,
     onAnimalClick: (String) -> Unit,
+    onFavoriteToggle: (String) -> Unit,
     onRetry: () -> Unit,
     onClearFilters: () -> Unit,
     modifier: Modifier = Modifier,
@@ -182,6 +224,9 @@ private fun HomeContent(
                         AnimalCard(
                             animal = animal,
                             onClick = { onAnimalClick(animal.desertionNo) },
+                            showFavoriteToggle = true,
+                            isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                            onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
                         )
                     }
 

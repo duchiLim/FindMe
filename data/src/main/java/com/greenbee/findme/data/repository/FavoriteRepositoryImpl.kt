@@ -4,6 +4,7 @@ import com.greenbee.findme.data.local.favorite.FavoriteAnimalDao
 import com.greenbee.findme.data.mapper.toDomain
 import com.greenbee.findme.data.mapper.toFavoriteEntity
 import com.greenbee.findme.domain.model.AbandonedAnimal
+import com.greenbee.findme.domain.model.FAVORITE_NOTICE_UNAVAILABLE_LABEL
 import com.greenbee.findme.domain.model.FavoriteAnimal
 import com.greenbee.findme.domain.repository.FavoriteRepository
 import javax.inject.Inject
@@ -25,10 +26,10 @@ class FavoriteRepositoryImpl @Inject constructor(
     override suspend fun isFavorite(desertionNo: String): Boolean =
         favoriteAnimalDao.isFavorite(desertionNo)
 
-    override suspend fun addFavorite(animal: AbandonedAnimal) {
+    override suspend fun addFavorite(animal: AbandonedAnimal, savedAt: Long) {
         val existing = favoriteAnimalDao.getByDesertionNo(animal.desertionNo)
         if (existing == null) {
-            favoriteAnimalDao.insert(animal.toFavoriteEntity())
+            favoriteAnimalDao.insert(animal.toFavoriteEntity(savedAt = savedAt))
         } else {
             favoriteAnimalDao.update(animal.toFavoriteEntity(savedAt = existing.savedAt))
         }
@@ -41,5 +42,12 @@ class FavoriteRepositoryImpl @Inject constructor(
     override suspend fun updateFavoriteSnapshot(animal: AbandonedAnimal) {
         val existing = favoriteAnimalDao.getByDesertionNo(animal.desertionNo) ?: return
         favoriteAnimalDao.update(animal.toFavoriteEntity(savedAt = existing.savedAt))
+    }
+
+    override suspend fun markNoticeUnavailable(desertionNo: String) {
+        val existing = favoriteAnimalDao.getByDesertionNo(desertionNo) ?: return
+        favoriteAnimalDao.update(
+            existing.copy(processState = FAVORITE_NOTICE_UNAVAILABLE_LABEL),
+        )
     }
 }

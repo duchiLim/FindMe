@@ -2,10 +2,14 @@ package com.greenbee.findme.presentation.favorite
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenbee.findme.domain.model.FavoriteAnimal
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
 import com.greenbee.findme.domain.usecase.RefreshFavoriteSnapshotsUseCase
+import com.greenbee.findme.domain.usecase.RemoveEndedFavoritesUseCase
 import com.greenbee.findme.domain.usecase.RemoveFavoriteUseCase
-import com.greenbee.findme.presentation.home.model.toUiModel
+import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
+import com.greenbee.findme.presentation.favorite.model.toFavoriteUiModel
+import com.greenbee.findme.presentation.favorite.model.sortedBy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,26 +22,23 @@ import kotlinx.coroutines.launch
 class FavoriteViewModel @Inject constructor(
     observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
+    private val restoreFavoriteUseCase: RestoreFavoriteUseCase,
     private val refreshFavoriteSnapshotsUseCase: RefreshFavoriteSnapshotsUseCase,
+    private val removeEndedFavoritesUseCase: RemoveEndedFavoritesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoriteUiState())
     val uiState: StateFlow<FavoriteUiState> = _uiState.asStateFlow()
 
+    private var rawFavorites: List<FavoriteAnimal> = emptyList()
     private var latestDesertionNos: List<String> = emptyList()
 
     init {
         viewModelScope.launch {
             observeFavoritesUseCase().collect { favorites ->
+                rawFavorites = favorites
                 latestDesertionNos = favorites.map { it.desertionNo }
-                val uiModels = favorites.map { it.animal.toUiModel() }
-                _uiState.update {
-                    it.copy(
-                        favorites = uiModels,
-                        isLoading = false,
-                        isEmpty = uiModels.isEmpty(),
-                    )
-                }
+                publishFavorites()
             }
         }
     }
@@ -46,15 +47,76 @@ class FavoriteViewModel @Inject constructor(
         if (latestDesertionNos.isEmpty() || _uiState.value.isRefreshing) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isRefreshing = true) }
-            runCatching { refreshFavoriteSnapshotsUseCase(latestDesertionNos) }
-            _uiState.update { it.copy(isRefreshing = false) }
+            _uiState.update { it.copy(isRefreshing = true, refreshFailedCount = 0) }
+            val result = runCatching { refreshFavoriteSnapshotsUseCase(latestDesertionNos) }
+                .getOrElse { com.greenbee.findme.domain.usecase.FavoriteRefreshResult(failedCount = latestDesertionNos.size) }
+            _uiState.update {
+                it.copy(
+                    isRefreshing = false,
+                    refreshFailedCount = result.failedCount,
+                )
+            }
         }
     }
 
+    fun setSortOrder(sortOrder: FavoriteSortOrder) {
+        _uiState.update { it.copy(sortOrder = sortOrder) }
+        publishFavorites()
+    }
+
     fun removeFavorite(desertionNo: String) {
+        val favorite = rawFavorites.find { it.desertionNo == desertionNo } ?: return
+
         viewModelScope.launch {
             removeFavoriteUseCase(desertionNo)
+            _uiState.update {
+                it.copy(
+                    pendingUndoFavorite = favorite,
+                    showRemovedSnackbar = true,
+                )
+            }
+        }
+    }
+
+    fun undoRemoveFavorite() {
+        val favorite = _uiState.value.pendingUndoFavorite ?: return
+
+        viewModelScope.launch {
+            restoreFavoriteUseCase(favorite)
+            onRemovedSnackbarHandled()
+        }
+    }
+
+    fun onRemovedSnackbarHandled() {
+        _uiState.update {
+            it.copy(
+                pendingUndoFavorite = null,
+                showRemovedSnackbar = false,
+            )
+        }
+    }
+
+    fun onUndoSnackbarShown() {
+        onRemovedSnackbarHandled()
+    }
+
+    fun clearEndedFavorites() {
+        viewModelScope.launch {
+            removeEndedFavoritesUseCase()
+        }
+    }
+
+    private fun publishFavorites() {
+        val sortOrder = _uiState.value.sortOrder
+        val uiModels = rawFavorites
+            .map { it.toFavoriteUiModel() }
+            .sortedBy(sortOrder)
+        _uiState.update {
+            it.copy(
+                favorites = uiModels,
+                isLoading = false,
+                isEmpty = uiModels.isEmpty(),
+            )
         }
     }
 }

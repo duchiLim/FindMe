@@ -1,6 +1,7 @@
 package com.greenbee.findme.presentation.home.model
 
 import com.greenbee.findme.domain.model.AbandonedAnimal
+import com.greenbee.findme.domain.model.FAVORITE_NOTICE_UNAVAILABLE_LABEL
 import com.greenbee.findme.presentation.ui.theme.FindMeStatusEnded
 import com.greenbee.findme.presentation.ui.theme.FindMeStatusNotice
 import com.greenbee.findme.presentation.ui.theme.FindMeStatusProtect
@@ -42,6 +43,7 @@ fun AbandonedAnimal.toUiModel(): AbandonedAnimalUiModel =
     )
 
 fun String.toProcessStateType(): ProcessStateType {
+    if (this == FAVORITE_NOTICE_UNAVAILABLE_LABEL) return ProcessStateType.ENDED
     val normalized = lowercase()
     return when {
         normalized.contains("공고") || normalized.contains("입양") -> ProcessStateType.NOTICE
@@ -51,3 +53,6 @@ fun String.toProcessStateType(): ProcessStateType {
         else -> ProcessStateType.UNKNOWN
     }
 }
+
+fun AbandonedAnimalUiModel.isEndedNotice(): Boolean =
+    statusType == ProcessStateType.ENDED || processState == FAVORITE_NOTICE_UNAVAILABLE_LABEL

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,10 @@ fun AnimalCard(
     modifier: Modifier = Modifier,
     showFavoriteRemove: Boolean = false,
     onFavoriteRemoveClick: (() -> Unit)? = null,
+    showFavoriteToggle: Boolean = false,
+    isFavorite: Boolean = false,
+    onFavoriteToggleClick: (() -> Unit)? = null,
+    isDimmed: Boolean = false,
 ) {
     Card(
         modifier = modifier
@@ -83,7 +89,10 @@ fun AnimalCard(
                     Surface(
                         modifier = Modifier
                             .align(
-                                if (showFavoriteRemove) Alignment.TopStart else Alignment.TopEnd,
+                                when {
+                                    showFavoriteRemove || showFavoriteToggle -> Alignment.TopStart
+                                    else -> Alignment.TopEnd
+                                },
                             )
                             .padding(8.dp),
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
@@ -97,6 +106,14 @@ fun AnimalCard(
                     }
                 }
 
+                if (isDimmed) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(Color.Black.copy(alpha = 0.35f)),
+                    )
+                }
+
                 if (showFavoriteRemove && onFavoriteRemoveClick != null) {
                     IconButton(
                         onClick = onFavoriteRemoveClick,
@@ -108,6 +125,25 @@ fun AnimalCard(
                             imageVector = Icons.Rounded.Favorite,
                             contentDescription = stringResource(R.string.favorite_remove),
                             tint = FindMePrimaryVariant,
+                        )
+                    }
+                } else if (showFavoriteToggle && onFavoriteToggleClick != null) {
+                    IconButton(
+                        onClick = onFavoriteToggleClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) {
+                                Icons.Rounded.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = stringResource(
+                                if (isFavorite) R.string.favorite_remove else R.string.favorite_add,
+                            ),
+                            tint = if (isFavorite) FindMePrimaryVariant else MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }

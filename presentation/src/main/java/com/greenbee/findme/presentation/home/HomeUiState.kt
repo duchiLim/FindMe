@@ -29,6 +29,8 @@ data class HomeUiState(
     val canLoadMore: Boolean = false,
     val isEmpty: Boolean = false,
     val errorMessage: String? = null,
+    val favoriteDesertionNos: Set<String> = emptySet(),
+    val favoriteSnackbar: HomeFavoriteSnackbar? = null,
 ) {
     val activeRegionFilterCount: Int
         get() = (if (selectedSido != null) 1 else 0) + (if (selectedSigungu != null) 1 else 0)

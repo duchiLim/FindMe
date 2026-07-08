@@ -22,8 +22,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -68,8 +70,15 @@ fun AnimalDetailScreen(
                 viewModel.onFavoriteMessageShown()
             }
             FavoriteMessage.REMOVED -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.favorite_removed_message))
-                viewModel.onFavoriteMessageShown()
+                val result = snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.favorite_removed_message),
+                    actionLabel = context.getString(R.string.favorite_undo),
+                    duration = SnackbarDuration.Short,
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
+                    SnackbarResult.Dismissed -> viewModel.onFavoriteMessageShown()
+                }
             }
             null -> Unit
         }

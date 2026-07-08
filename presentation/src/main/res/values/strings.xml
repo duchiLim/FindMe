@@ -11,6 +11,15 @@
     <string name="favorite_empty_description">홈에서 마음에 드는 아이를 저장해 보세요.</string>
     <string name="favorite_browse_animals">유기동물 보러 가기</string>
     <string name="favorite_total_count">마음에 둔 동물 %1$d마리 · 최근 추가순</string>
+    <string name="favorite_total_count_status_sort">마음에 둔 동물 %1$d마리 · 공고 상태순</string>
+    <string name="favorite_ended_count">종료된 공고 %1$d마리</string>
+    <string name="favorite_sort_saved_at">최근 추가순</string>
+    <string name="favorite_sort_status">공고 상태순</string>
+    <string name="favorite_sort_menu">정렬</string>
+    <string name="favorite_refresh_failed_banner">일부 정보를 갱신하지 못했습니다. 저장된 정보를 표시합니다.</string>
+    <string name="favorite_cleanup_ended">종료된 공고 정리하기</string>
+    <string name="favorite_undo">실행 취소</string>
+    <string name="favorite_view_list">목록 보기</string>
     <string name="nav_shelter">보호소</string>
     <string name="nav_my">마이</string>
     <string name="home_filter_all">전체</string>

@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.usecase.FavoriteToggleResult
+import com.greenbee.findme.domain.model.FavoriteAnimal
 import com.greenbee.findme.domain.usecase.FindShelterByNameUseCase
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalDetailUseCase
+import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
 import com.greenbee.findme.domain.usecase.ObserveIsFavoriteUseCase
 import com.greenbee.findme.domain.usecase.RecordRecentlyViewedUseCase
+import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.detail.model.toDetailUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +27,8 @@ class AnimalDetailViewModel @Inject constructor(
     private val getAbandonedAnimalDetailUseCase: GetAbandonedAnimalDetailUseCase,
     private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val restoreFavoriteUseCase: RestoreFavoriteUseCase,
+    observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val recordRecentlyViewedUseCase: RecordRecentlyViewedUseCase,
     private val findShelterByNameUseCase: FindShelterByNameUseCase,
 ) : ViewModel() {
@@ -33,12 +38,20 @@ class AnimalDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AnimalDetailUiState())
     val uiState: StateFlow<AnimalDetailUiState> = _uiState.asStateFlow()
 
+    private var rawFavorites: List<FavoriteAnimal> = emptyList()
+    private var pendingUndoFavorite: FavoriteAnimal? = null
+
     init {
         loadDetail()
         if (desertionNo.isNotBlank()) {
             viewModelScope.launch {
                 observeIsFavoriteUseCase(desertionNo).collect { isFavorite ->
                     _uiState.update { it.copy(isFavorite = isFavorite) }
+                }
+            }
+            viewModelScope.launch {
+                observeFavoritesUseCase().collect { favorites ->
+                    rawFavorites = favorites
                 }
             }
         }
@@ -52,8 +65,18 @@ class AnimalDetailViewModel @Inject constructor(
         if (desertionNo.isBlank()) return
 
         viewModelScope.launch {
+            val favoriteBeforeRemove = if (_uiState.value.isFavorite) {
+                rawFavorites.find { it.desertionNo == desertionNo }
+            } else {
+                null
+            }
             runCatching { toggleFavoriteUseCase(desertionNo) }
                 .onSuccess { result ->
+                    pendingUndoFavorite = if (result == FavoriteToggleResult.REMOVED) {
+                        favoriteBeforeRemove
+                    } else {
+                        null
+                    }
                     _uiState.update {
                         it.copy(
                             favoriteMessage = when (result) {
@@ -66,7 +89,16 @@ class AnimalDetailViewModel @Inject constructor(
         }
     }
 
+    fun undoRemoveFavorite() {
+        val favorite = pendingUndoFavorite ?: return
+        viewModelScope.launch {
+            restoreFavoriteUseCase(favorite)
+            pendingUndoFavorite = null
+        }
+    }
+
     fun onFavoriteMessageShown() {
+        pendingUndoFavorite = null
         _uiState.update { it.copy(favoriteMessage = null) }
     }
 

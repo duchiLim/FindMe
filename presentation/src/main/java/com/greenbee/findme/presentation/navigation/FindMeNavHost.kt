@@ -35,6 +35,15 @@ fun FindMeNavHost(
                 onAnimalClick = { desertionNo ->
                     navController.navigate(FindMeRoute.animalDetail(desertionNo))
                 },
+                onNavigateToFavorite = {
+                    navController.navigate(FindMeRoute.FAVORITE) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
             )
         }
         composable(FindMeRoute.FAVORITE) {

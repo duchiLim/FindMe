@@ -15,10 +15,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Badge
@@ -32,24 +30,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,8 +60,8 @@ import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.home.component.AnimalCard
 import com.greenbee.findme.presentation.home.component.HomeAdvancedFilterBottomSheet
+import com.greenbee.findme.presentation.home.component.HomeCollapsingSearchFilterSection
 import com.greenbee.findme.presentation.home.component.HomeCurationSection
-import com.greenbee.findme.presentation.home.component.HomeFilterBar
 import com.greenbee.findme.presentation.home.component.HomeGridSkeleton
 import com.greenbee.findme.presentation.home.component.HomeRegionFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomSheet
@@ -81,6 +82,22 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     var isSortMenuExpanded by remember { mutableStateOf(false) }
+    var searchFilterHeightPx by remember { mutableFloatStateOf(0f) }
+    val isScrollHideEnabled = !uiState.isLoading &&
+        uiState.errorMessage == null &&
+        !uiState.isSearchEmpty &&
+        !(uiState.isEmpty && !uiState.isFilterLoading)
+    val searchFilterScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState(initialHeightOffsetLimit = -1f),
+        canScroll = { isScrollHideEnabled && searchFilterHeightPx > 0f },
+    )
+
+    LaunchedEffect(searchFilterHeightPx, isScrollHideEnabled) {
+        searchFilterScrollBehavior.state.heightOffsetLimit = -searchFilterHeightPx
+        if (!isScrollHideEnabled) {
+            searchFilterScrollBehavior.state.heightOffset = 0f
+        }
+    }
 
     LaunchedEffect(uiState.favoriteSnackbar) {
         when (uiState.favoriteSnackbar) {
@@ -126,14 +143,17 @@ fun HomeScreen(
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(searchFilterScrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0),
-                title = { Text(stringResource(R.string.home_screen_title)) },
-                actions = {
+            Column {
+                TopAppBar(
+                    windowInsets = WindowInsets(0),
+                    title = { Text(stringResource(R.string.home_screen_title)) },
+                    actions = {
                         if (uiState.isRecentViewingEnabled) {
                             IconButton(onClick = onNavigateToRecent) {
                                 Icon(
@@ -192,46 +212,23 @@ fun HomeScreen(
                         }
                     },
                 )
+                HomeCollapsingSearchFilterSection(
+                    scrollBehavior = searchFilterScrollBehavior,
+                    searchQuery = uiState.searchQuery,
+                    activeRegionFilterCount = uiState.activeRegionFilterCount,
+                    selectedUpKind = uiState.selectedUpKind,
+                    selectedState = uiState.selectedState,
+                    onSearchQueryChange = viewModel::onSearchQueryChange,
+                    onClearSearch = viewModel::clearSearch,
+                    onRegionFilterClick = viewModel::onRegionFilterClick,
+                    onUpKindFilterClick = viewModel::onUpKindFilterClick,
+                    onStateSelected = viewModel::onStateSelected,
+                    onHeightChanged = { searchFilterHeightPx = it.toFloat() },
+                )
+            }
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            SearchBarDefaults.InputField(
-                query = uiState.searchQuery,
-                onQueryChange = viewModel::onSearchQueryChange,
-                onSearch = {},
-                expanded = false,
-                onExpandedChange = {},
-                placeholder = { Text(stringResource(R.string.home_search_hint)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Search,
-                        contentDescription = null,
-                    )
-                },
-                trailingIcon = {
-                    if (uiState.searchQuery.isNotBlank()) {
-                        IconButton(onClick = viewModel::clearSearch) {
-                            Icon(
-                                imageVector = Icons.Rounded.Close,
-                                contentDescription = stringResource(R.string.home_search_clear),
-                            )
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-            )
-
-            HomeFilterBar(
-            activeRegionFilterCount = uiState.activeRegionFilterCount,
-            selectedUpKind = uiState.selectedUpKind,
-            selectedState = uiState.selectedState,
-            onRegionFilterClick = viewModel::onRegionFilterClick,
-            onUpKindFilterClick = viewModel::onUpKindFilterClick,
-            onStateSelected = viewModel::onStateSelected,
-        )
-
         HomeRegionFilterBottomSheet(
             visible = uiState.isRegionFilterSheetVisible,
             sidoList = uiState.sidoList,

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,11 +22,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +47,7 @@ import com.greenbee.findme.presentation.detail.component.DetailInfoRow
 import com.greenbee.findme.presentation.detail.component.DetailSectionCard
 import com.greenbee.findme.presentation.detail.model.AnimalDetailUiModel
 import com.greenbee.findme.presentation.home.component.AnimalKindTitleRow
+import com.greenbee.findme.presentation.ui.theme.FindMePrimaryVariant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,9 +58,25 @@ fun AnimalDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.favoriteMessage) {
+        when (uiState.favoriteMessage) {
+            FavoriteMessage.ADDED -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.favorite_added_message))
+                viewModel.onFavoriteMessageShown()
+            }
+            FavoriteMessage.REMOVED -> {
+                snackbarHostState.showSnackbar(context.getString(R.string.favorite_removed_message))
+                viewModel.onFavoriteMessageShown()
+            }
+            null -> Unit
+        }
+    }
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -76,6 +99,25 @@ fun AnimalDetailScreen(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = stringResource(R.string.detail_back),
                         )
+                    }
+                },
+                actions = {
+                    if (uiState.animal != null) {
+                        IconButton(onClick = viewModel::toggleFavorite) {
+                            Icon(
+                                imageVector = if (uiState.isFavorite) {
+                                    Icons.Rounded.Favorite
+                                } else {
+                                    Icons.Outlined.FavoriteBorder
+                                },
+                                contentDescription = if (uiState.isFavorite) {
+                                    stringResource(R.string.favorite_remove)
+                                } else {
+                                    stringResource(R.string.favorite_add)
+                                },
+                                tint = if (uiState.isFavorite) FindMePrimaryVariant else MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
                 },
             )

@@ -10,8 +10,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,18 +25,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
 import com.greenbee.findme.presentation.ui.theme.FindMeBackground
+import com.greenbee.findme.presentation.ui.theme.FindMePrimaryVariant
 
 @Composable
 fun AnimalCard(
     animal: AbandonedAnimalUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showFavoriteRemove: Boolean = false,
+    onFavoriteRemoveClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier
@@ -74,7 +82,9 @@ fun AnimalCard(
                 if (animal.imageUrls.size > 1) {
                     Surface(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
+                            .align(
+                                if (showFavoriteRemove) Alignment.TopStart else Alignment.TopEnd,
+                            )
                             .padding(8.dp),
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                         shape = RoundedCornerShape(8.dp),
@@ -83,6 +93,21 @@ fun AnimalCard(
                             text = "${animal.imageUrls.size}",
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+
+                if (showFavoriteRemove && onFavoriteRemoveClick != null) {
+                    IconButton(
+                        onClick = onFavoriteRemoveClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = stringResource(R.string.favorite_remove),
+                            tint = FindMePrimaryVariant,
                         )
                     }
                 }

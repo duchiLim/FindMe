@@ -222,7 +222,7 @@ data class HomeUiState(
 | From | Action | To |
 | :--- | :--- | :--- |
 | 홈 카드 탭 | `navController.navigate(FindMeRoute.animalDetail(desertionNo))` | 동물 상세 |
-| (Phase 2) 마음에 두기 버튼 | Room 저장 + 스낵바 | 마음에 두기 탭 이동 유도 |
+| (Phase 2) 마음에 두기 버튼 | Room 저장 + 스낵바 | 마음에 두기 탭 · [FAVORITE.md](./FAVORITE.md) |
 | (Phase 2) 보호소명 탭 | 보호소 탭 + (선택) 지역·매칭 | 보호소 · [SHELTER.md](./SHELTER.md) |
 
 - 홈은 **top-level route** → Bottom Bar 유지
@@ -244,9 +244,9 @@ data class HomeUiState(
 ### Phase 2
 - [ ] Top App Bar + 필터 바텀시트 (시도/시군구/기간)
 - [ ] Pull-to-refresh
-- [ ] 카드 내 마음에 두기 버튼
+- [ ] 카드 내 마음에 두기 버튼 · [FAVORITE.md](./FAVORITE.md)
 - [ ] 스켈레톤 로딩
-- [ ] 최근 본 동물 (마이 연동)
+- [ ] 최근 본 동물 (마이 연동) · [MY.md](./MY.md)
 
 ### Phase 3
 - [ ] 검색 (품종명·특징 키워드 — API 제약 시 클라이언트 필터)

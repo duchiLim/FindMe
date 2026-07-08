@@ -270,12 +270,12 @@ data class AnimalDetailUiState(
 | :--- | :--- | :--- |
 | 홈 카드 | `FindMeRoute.animalDetail(desertionNo)` | 동물 상세 |
 | (Phase 2) 마음에 둔 카드 | 동일 | 동물 상세 |
-| (Phase 2) 마이 > 최근 본 | 동일 + Room 기록 | 동물 상세 |
+| (Phase 2) 마이 > 최근 본 | 동일 + Room 기록 | 동물 상세 · [MY.md](./MY.md) |
 | 보호소 전화 | `ACTION_DIAL` | 시스템 전화 앱 |
-| (Phase 2) 마음에 두기 | Room insert/delete | 스낵바 "마음에 둔 목록에 추가" |
+| (Phase 2) 마음에 두기 | Room insert/delete | 스낵바 "마음에 둔 목록에 추가" · [FAVORITE.md](./FAVORITE.md) |
 | (Phase 2) 보호소명 | 보호소 탭 navigate | `shelter` (+ careRegNo) |
 
-**최근 본 동물 (Phase 2):** 상세 진입 시 `desertionNo` + 타임스탬프 Room 저장 → 마이 탭 노출.
+**최근 본 동물 (MVP):** 상세 진입 시 `desertionNo` + 타임스탬프 Room 저장 → 마이 탭 노출. 상세: [MY.md](./MY.md)
 
 ---
 
@@ -294,7 +294,7 @@ data class AnimalDetailUiState(
 
 ### Phase 2
 
-- [ ] 마음에 두기 (Room + TopBar/BottomBar)
+- [ ] 마음에 두기 (Room + TopBar/BottomBar) · [FAVORITE.md](./FAVORITE.md)
 - [ ] Pull-to-refresh (상세 재조회)
 - [ ] 보호소 주소 · 지도 · 길찾기
 - [ ] 공고 기간 / D-day

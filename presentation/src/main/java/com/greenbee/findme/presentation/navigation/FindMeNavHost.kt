@@ -6,11 +6,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.greenbee.findme.presentation.R
 import androidx.navigation.NavType
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.greenbee.findme.presentation.common.PlaceholderScreen
 import com.greenbee.findme.presentation.detail.AnimalDetailScreen
+import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
 import com.greenbee.findme.presentation.shelter.ShelterScreen
 
@@ -33,7 +35,20 @@ fun FindMeNavHost(
             )
         }
         composable(FindMeRoute.FAVORITE) {
-            PlaceholderScreen(title = stringResource(R.string.favorite_screen_title))
+            FavoriteScreen(
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+                onBrowseAnimalsClick = {
+                    navController.navigate(FindMeRoute.HOME) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+            )
         }
         composable(FindMeRoute.SHELTER) {
             ShelterScreen()

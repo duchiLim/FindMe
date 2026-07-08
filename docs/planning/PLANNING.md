@@ -85,15 +85,18 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 - 전화 CTA (`ACTION_DIAL`)
 - (Phase 2) 보호소 상세, 홈 연동, 지도·길찾기
 
-#### 마음에 두기 (`favorite`) — Phase 2
-- Room에 저장한 관심 동물 목록
-- 마음에 두기 / 마음에서 빼기, 정렬(최근 추가순)
-- (추후) 입양·임시보호 신청 바로가기
+#### 마음에 두기 (`favorite`) — MVP
+- 상세 기획: [FAVORITE.md](./FAVORITE.md)
+- Room 로컬 저장 (`desertionNo` + 스냅샷)
+- 2열 카드 그리드, 최근 추가순
+- 마음에 두기 / 마음에서 빼기 (상세 TopBar ♥)
+- (Phase 2) 홈 카드 ♥, Pull-to-refresh, 종료 공고 정리
 
-#### 마이 (`my`) — Phase 2
-- 최근 본 동물
-- 입양/임시보호 신청 내역 (추후)
-- 알림, 앱 설정, API/버전 정보
+#### 마이 (`my`) — MVP
+- 상세 기획: [MY.md](./MY.md)
+- Room **최근 본 동물** (상세 진입 시 자동 기록, 최대 30건)
+- 가로 스크롤 미리보기 + 앱 정보·데이터 출처
+- (Phase 2) 전체 보기, 기록 삭제, 신청 내역 placeholder, 알림 설정
 
 ### 6.3 상세 화면 (Bottom Bar 미표시)
 
@@ -119,8 +122,8 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 | :--- | :--- |
 | 홈 | ✅ `HomeScreen` (API 연동) |
 | 보호소 | ✅ `ShelterScreen` (API 연동) · 기획: [SHELTER.md](./SHELTER.md) |
-| 마음에 두기 | 🔲 Placeholder |
-| 마이 | 🔲 Placeholder |
+| 마음에 두기 | ✅ `FavoriteScreen` (Room) · 기획: [FAVORITE.md](./FAVORITE.md) |
+| 마이 | 🔲 Placeholder · 기획: [MY.md](./MY.md) |
 | 동물 상세 | 🔲 Route만 등록 |
 
 ## 7. 기대 효과

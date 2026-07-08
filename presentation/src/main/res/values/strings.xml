@@ -6,6 +6,11 @@
     <string name="favorite_add">마음에 두기</string>
     <string name="favorite_remove">마음에서 빼기</string>
     <string name="favorite_added_message">마음에 둔 목록에 추가했습니다</string>
+    <string name="favorite_removed_message">마음에 둔 목록에서 뺐습니다</string>
+    <string name="favorite_empty_title">아직 마음에 둔 동물이 없어요</string>
+    <string name="favorite_empty_description">홈에서 마음에 드는 아이를 저장해 보세요.</string>
+    <string name="favorite_browse_animals">유기동물 보러 가기</string>
+    <string name="favorite_total_count">마음에 둔 동물 %1$d마리 · 최근 추가순</string>
     <string name="nav_shelter">보호소</string>
     <string name="nav_my">마이</string>
     <string name="home_filter_all">전체</string>

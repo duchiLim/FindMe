@@ -3,7 +3,10 @@ package com.greenbee.findme.presentation.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenbee.findme.domain.usecase.FavoriteToggleResult
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalDetailUseCase
+import com.greenbee.findme.domain.usecase.ObserveIsFavoriteUseCase
+import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.detail.model.toDetailUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,6 +20,8 @@ import kotlinx.coroutines.launch
 class AnimalDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAbandonedAnimalDetailUseCase: GetAbandonedAnimalDetailUseCase,
+    private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
 
     private val desertionNo: String = savedStateHandle.get<String>("desertionNo").orEmpty()
@@ -26,10 +31,39 @@ class AnimalDetailViewModel @Inject constructor(
 
     init {
         loadDetail()
+        if (desertionNo.isNotBlank()) {
+            viewModelScope.launch {
+                observeIsFavoriteUseCase(desertionNo).collect { isFavorite ->
+                    _uiState.update { it.copy(isFavorite = isFavorite) }
+                }
+            }
+        }
     }
 
     fun retry() {
         loadDetail(forceLoading = true)
+    }
+
+    fun toggleFavorite() {
+        if (desertionNo.isBlank()) return
+
+        viewModelScope.launch {
+            runCatching { toggleFavoriteUseCase(desertionNo) }
+                .onSuccess { result ->
+                    _uiState.update {
+                        it.copy(
+                            favoriteMessage = when (result) {
+                                FavoriteToggleResult.ADDED -> FavoriteMessage.ADDED
+                                FavoriteToggleResult.REMOVED -> FavoriteMessage.REMOVED
+                            },
+                        )
+                    }
+                }
+        }
+    }
+
+    fun onFavoriteMessageShown() {
+        _uiState.update { it.copy(favoriteMessage = null) }
     }
 
     private fun loadDetail(forceLoading: Boolean = false) {

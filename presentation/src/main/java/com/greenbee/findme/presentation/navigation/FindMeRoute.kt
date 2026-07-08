@@ -15,6 +15,7 @@ object FindMeRoute {
     const val MY_ABOUT = "my/about"
     const val MY_RECENT = "my/recent"
     const val MY_APPLICATIONS = "my/applications"
+    const val HOME_TODAY = "home/today"
 
     val topLevelRoutes = setOf(HOME, FAVORITE, SHELTER, MY)
 

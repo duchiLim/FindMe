@@ -71,6 +71,7 @@ fun HomeScreen(
     onAnimalClick: (String) -> Unit,
     onNavigateToFavorite: () -> Unit,
     onNavigateToRecent: () -> Unit,
+    onNavigateToTodayRegistered: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -294,6 +295,7 @@ fun HomeScreen(
                 onRetry = viewModel::retry,
                 onClearFilters = viewModel::clearFilters,
                 onClearSearch = viewModel::clearSearch,
+                onNavigateToTodayRegistered = onNavigateToTodayRegistered,
             )
         }
     }
@@ -309,6 +311,7 @@ private fun HomeContent(
     onRetry: () -> Unit,
     onClearFilters: () -> Unit,
     onClearSearch: () -> Unit,
+    onNavigateToTodayRegistered: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -385,7 +388,7 @@ private fun HomeContent(
                         )
                     }
 
-                    if (uiState.todayRegisteredAnimals.isNotEmpty()) {
+                    if (uiState.searchQuery.isBlank()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             HomeCurationSection(
                                 title = stringResource(R.string.home_curation_today),
@@ -393,6 +396,7 @@ private fun HomeContent(
                                 favoriteDesertionNos = uiState.favoriteDesertionNos,
                                 onAnimalClick = onAnimalClick,
                                 onFavoriteToggle = onFavoriteToggle,
+                                onSeeMoreClick = onNavigateToTodayRegistered,
                             )
                         }
                     }

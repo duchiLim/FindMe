@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
+import com.greenbee.findme.presentation.home.today.HomeTodayRegisteredScreen
 import com.greenbee.findme.presentation.my.MyAboutScreen
 import com.greenbee.findme.presentation.my.MyApplicationsScreen
 import com.greenbee.findme.presentation.my.MyRecentScreen
@@ -46,6 +47,26 @@ fun FindMeNavHost(
                 },
                 onNavigateToRecent = {
                     navController.navigate(FindMeRoute.MY_RECENT)
+                },
+                onNavigateToTodayRegistered = {
+                    navController.navigate(FindMeRoute.HOME_TODAY)
+                },
+            )
+        }
+        composable(FindMeRoute.HOME_TODAY) {
+            HomeTodayRegisteredScreen(
+                onBackClick = { navController.popBackStack() },
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+                onNavigateToFavorite = {
+                    navController.navigate(FindMeRoute.FAVORITE) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 },
             )
         }

@@ -10,10 +10,10 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.greenbee.findme.presentation.common.PlaceholderScreen
 import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
+import com.greenbee.findme.presentation.my.MyScreen
 import com.greenbee.findme.presentation.shelter.ShelterScreen
 
 @Composable
@@ -54,7 +54,11 @@ fun FindMeNavHost(
             ShelterScreen()
         }
         composable(FindMeRoute.MY) {
-            PlaceholderScreen(title = "마이")
+            MyScreen(
+                onAnimalClick = { desertionNo ->
+                    navController.navigate(FindMeRoute.animalDetail(desertionNo))
+                },
+            )
         }
         composable(
             route = FindMeRoute.ANIMAL_DETAIL,

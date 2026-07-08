@@ -123,8 +123,8 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 | 홈 | ✅ `HomeScreen` (API 연동) |
 | 보호소 | ✅ `ShelterScreen` (API 연동) · 기획: [SHELTER.md](./SHELTER.md) |
 | 마음에 두기 | ✅ `FavoriteScreen` (Room) · 기획: [FAVORITE.md](./FAVORITE.md) |
-| 마이 | 🔲 Placeholder · 기획: [MY.md](./MY.md) |
-| 동물 상세 | 🔲 Route만 등록 |
+| 마이 | ✅ `MyScreen` (Room) · 기획: [MY.md](./MY.md) |
+| 동물 상세 | ✅ `AnimalDetailScreen` |
 
 ## 7. 기대 효과
 - 유기동물의 재입양률 증가 및 안락사 비율 감소

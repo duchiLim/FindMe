@@ -3,11 +3,13 @@ package com.greenbee.findme.data.di
 import com.greenbee.findme.data.repository.AbandonedAnimalRepositoryImpl
 import com.greenbee.findme.data.repository.AnimalKindRepositoryImpl
 import com.greenbee.findme.data.repository.FavoriteRepositoryImpl
+import com.greenbee.findme.data.repository.RecentlyViewedRepositoryImpl
 import com.greenbee.findme.data.repository.RegionRepositoryImpl
 import com.greenbee.findme.data.repository.ShelterRepositoryImpl
 import com.greenbee.findme.domain.repository.AbandonedAnimalRepository
 import com.greenbee.findme.domain.repository.AnimalKindRepository
 import com.greenbee.findme.domain.repository.FavoriteRepository
+import com.greenbee.findme.domain.repository.RecentlyViewedRepository
 import com.greenbee.findme.domain.repository.RegionRepository
 import com.greenbee.findme.domain.repository.ShelterRepository
 import dagger.Binds
@@ -49,4 +51,10 @@ abstract class RepositoryModule {
     abstract fun bindFavoriteRepository(
         impl: FavoriteRepositoryImpl,
     ): FavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecentlyViewedRepository(
+        impl: RecentlyViewedRepositoryImpl,
+    ): RecentlyViewedRepository
 }

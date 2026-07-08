@@ -317,16 +317,16 @@ const val MY_APPLICATIONS = "my/applications"
 ### MVP (1차 출시)
 
 **저장소 · 도메인**
-- [ ] `RecentlyViewedEntity` + DAO + DB migration (v1→v2)
-- [ ] `RecentlyViewedRepository` + UseCase (observe, record)
-- [ ] `AnimalDetailViewModel` 진입 시 자동 기록
+- [x] `RecentlyViewedEntity` + DAO + DB migration (v1→v2)
+- [x] `RecentlyViewedRepository` + UseCase (observe, record)
+- [x] `AnimalDetailViewModel` 진입 시 자동 기록
 
 **마이 탭**
-- [ ] `MyScreen` + `MyViewModel` + `MyUiState`
-- [ ] 최근 본 동물 `LazyRow` (최대 10건 미리보기)
-- [ ] Empty 섹션 UI
-- [ ] 설정: **앱 정보** (인라인 또는 간단 Bottom Sheet), **데이터 출처**
-- [ ] Footer 버전 표시
+- [x] `MyScreen` + `MyViewModel` + `MyUiState`
+- [x] 최근 본 동물 `LazyRow` (최대 10건 미리보기)
+- [x] Empty 섹션 UI
+- [x] 설정: **앱 정보** (Dialog), **데이터 출처** (브라우저)
+- [x] Footer 버전 표시
 
 ### Phase 2
 
@@ -396,13 +396,13 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 | 항목 | 상태 |
 | :--- | :--- |
 | Route 등록 (`my`) | ✅ |
-| `MyScreen` | 🔲 Placeholder |
-| Room (recently viewed) | 🔲 |
-| 상세 자동 기록 | 🔲 |
-| 최근 본 UI | 🔲 |
-| 설정 메뉴 | 🔲 |
+| `MyScreen` | ✅ |
+| Room (recently viewed) | ✅ |
+| 상세 자동 기록 | ✅ |
+| 최근 본 UI | ✅ |
+| 설정 메뉴 | ✅ |
 | 신청 내역 | 🔲 |
-| 문자열 | 🔲 (`nav_my`만 ✅) |
+| 문자열 | ✅ |
 
 ---
 

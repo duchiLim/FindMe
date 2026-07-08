@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.usecase.FavoriteToggleResult
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalDetailUseCase
 import com.greenbee.findme.domain.usecase.ObserveIsFavoriteUseCase
+import com.greenbee.findme.domain.usecase.RecordRecentlyViewedUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.detail.model.toDetailUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +23,7 @@ class AnimalDetailViewModel @Inject constructor(
     private val getAbandonedAnimalDetailUseCase: GetAbandonedAnimalDetailUseCase,
     private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val recordRecentlyViewedUseCase: RecordRecentlyViewedUseCase,
 ) : ViewModel() {
 
     private val desertionNo: String = savedStateHandle.get<String>("desertionNo").orEmpty()
@@ -89,6 +91,7 @@ class AnimalDetailViewModel @Inject constructor(
                         errorMessage = null,
                     )
                 }
+                recordRecentlyViewed()
             } else {
                 _uiState.update {
                     it.copy(
@@ -112,6 +115,7 @@ class AnimalDetailViewModel @Inject constructor(
                                 errorMessage = null,
                             )
                         }
+                        recordRecentlyViewed()
                     } else {
                         _uiState.update {
                             it.copy(
@@ -136,6 +140,12 @@ class AnimalDetailViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    private fun recordRecentlyViewed() {
+        viewModelScope.launch {
+            runCatching { recordRecentlyViewedUseCase(desertionNo) }
         }
     }
 }

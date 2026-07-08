@@ -32,4 +32,25 @@ class UserSettingsRepositoryImpl @Inject constructor(
     override suspend fun setHomeLayoutMode(mode: HomeLayoutMode) {
         preferencesDataStore.setHomeLayoutMode(mode)
     }
+
+    override fun observeRecentLayoutMode(): Flow<HomeLayoutMode> =
+        preferencesDataStore.recentLayoutMode
+
+    override suspend fun setRecentLayoutMode(mode: HomeLayoutMode) {
+        preferencesDataStore.setRecentLayoutMode(mode)
+    }
+
+    override fun observeShelterLayoutMode(): Flow<HomeLayoutMode> =
+        preferencesDataStore.shelterLayoutMode
+
+    override suspend fun setShelterLayoutMode(mode: HomeLayoutMode) {
+        preferencesDataStore.setShelterLayoutMode(mode)
+    }
+
+    override fun observeFavoriteLayoutMode(): Flow<HomeLayoutMode> =
+        preferencesDataStore.favoriteLayoutMode
+
+    override suspend fun setFavoriteLayoutMode(mode: HomeLayoutMode) {
+        preferencesDataStore.setFavoriteLayoutMode(mode)
+    }
 }

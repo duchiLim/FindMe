@@ -605,7 +605,6 @@ private fun HomeAnimalList(
             end = 16.dp,
             bottom = 16.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (uiState.searchQuery.isBlank()) {
             item(key = "curation_today") {

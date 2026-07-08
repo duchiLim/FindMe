@@ -63,6 +63,7 @@
     <string name="home_layout_switch_to_list">노멀뷰</string>
     <string name="home_layout_switch_to_grid">2열뷰</string>
     <string name="home_layout_switch_to_cover">카드뷰</string>
+    <string name="home_happen_place_unknown">발견 장소 미상</string>
     <string name="home_curation_today">오늘 등록</string>
     <string name="home_curation_imminent">입양 임박</string>
     <string name="home_curation_see_all">전체 보기</string>

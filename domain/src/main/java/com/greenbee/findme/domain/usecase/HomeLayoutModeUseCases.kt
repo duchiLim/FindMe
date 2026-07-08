@@ -18,3 +18,45 @@ class SetHomeLayoutModeUseCase @Inject constructor(
         repository.setHomeLayoutMode(mode)
     }
 }
+
+class ObserveRecentLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    operator fun invoke(): Flow<HomeLayoutMode> = repository.observeRecentLayoutMode()
+}
+
+class SetRecentLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    suspend operator fun invoke(mode: HomeLayoutMode) {
+        repository.setRecentLayoutMode(mode)
+    }
+}
+
+class ObserveShelterLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    operator fun invoke(): Flow<HomeLayoutMode> = repository.observeShelterLayoutMode()
+}
+
+class SetShelterLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    suspend operator fun invoke(mode: HomeLayoutMode) {
+        repository.setShelterLayoutMode(mode)
+    }
+}
+
+class ObserveFavoriteLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    operator fun invoke(): Flow<HomeLayoutMode> = repository.observeFavoriteLayoutMode()
+}
+
+class SetFavoriteLayoutModeUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    suspend operator fun invoke(mode: HomeLayoutMode) {
+        repository.setFavoriteLayoutMode(mode)
+    }
+}

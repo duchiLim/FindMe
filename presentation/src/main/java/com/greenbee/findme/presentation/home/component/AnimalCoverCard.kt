@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,6 +50,7 @@ fun AnimalCoverCard(
     showFavoriteToggle: Boolean = false,
     isFavorite: Boolean = false,
     onFavoriteToggleClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
     isDimmed: Boolean = false,
 ) {
     Card(
@@ -123,6 +126,20 @@ fun AnimalCoverCard(
             }
 
             when {
+                onDeleteClick != null -> {
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = stringResource(R.string.my_recent_delete_item),
+                            tint = Color.White,
+                        )
+                    }
+                }
                 showFavoriteRemove && onFavoriteRemoveClick != null -> {
                     IconButton(
                         onClick = onFavoriteRemoveClick,
@@ -172,14 +189,31 @@ fun AnimalCoverCard(
                     titleStyle = MaterialTheme.typography.titleSmall,
                     kindNameColor = Color.White,
                 )
-                Text(
-                    text = animal.shelterName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.88f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = animal.happenPlace.ifBlank {
+                            stringResource(R.string.home_happen_place_unknown)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.88f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = animal.shelterName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.88f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
             }
         }
     }

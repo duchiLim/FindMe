@@ -3,11 +3,14 @@ package com.greenbee.findme.presentation.favorite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.model.FavoriteAnimal
+import com.greenbee.findme.domain.model.HomeLayoutMode
+import com.greenbee.findme.domain.usecase.ObserveFavoriteLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
 import com.greenbee.findme.domain.usecase.RefreshFavoriteSnapshotsUseCase
 import com.greenbee.findme.domain.usecase.RemoveEndedFavoritesUseCase
 import com.greenbee.findme.domain.usecase.RemoveFavoriteUseCase
 import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
+import com.greenbee.findme.domain.usecase.SetFavoriteLayoutModeUseCase
 import com.greenbee.findme.presentation.favorite.model.toFavoriteUiModel
 import com.greenbee.findme.presentation.favorite.model.sortedBy
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +24,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class FavoriteViewModel @Inject constructor(
     observeFavoritesUseCase: ObserveFavoritesUseCase,
+    observeFavoriteLayoutModeUseCase: ObserveFavoriteLayoutModeUseCase,
+    private val setFavoriteLayoutModeUseCase: SetFavoriteLayoutModeUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
     private val restoreFavoriteUseCase: RestoreFavoriteUseCase,
     private val refreshFavoriteSnapshotsUseCase: RefreshFavoriteSnapshotsUseCase,
@@ -34,6 +39,11 @@ class FavoriteViewModel @Inject constructor(
     private var latestDesertionNos: List<String> = emptyList()
 
     init {
+        viewModelScope.launch {
+            observeFavoriteLayoutModeUseCase().collect { layoutMode ->
+                _uiState.update { it.copy(layoutMode = layoutMode) }
+            }
+        }
         viewModelScope.launch {
             observeFavoritesUseCase().collect { favorites ->
                 rawFavorites = favorites
@@ -103,6 +113,17 @@ class FavoriteViewModel @Inject constructor(
     fun clearEndedFavorites() {
         viewModelScope.launch {
             removeEndedFavoritesUseCase()
+        }
+    }
+
+    fun toggleLayoutMode() {
+        val nextMode = when (_uiState.value.layoutMode) {
+            HomeLayoutMode.GRID -> HomeLayoutMode.LIST
+            HomeLayoutMode.LIST -> HomeLayoutMode.COVER
+            HomeLayoutMode.COVER -> HomeLayoutMode.GRID
+        }
+        viewModelScope.launch {
+            setFavoriteLayoutModeUseCase(nextMode)
         }
     }
 

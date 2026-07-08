@@ -4,6 +4,7 @@ import com.greenbee.findme.domain.model.RecentlyViewedAnimal
 import com.greenbee.findme.presentation.home.model.ProcessStateType
 import com.greenbee.findme.presentation.home.model.toProcessStateType
 import com.greenbee.findme.presentation.home.model.toUiModel
+import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
 import com.greenbee.findme.presentation.my.util.formatRelativeTime
 
 data class RecentAnimalUiModel(
@@ -28,3 +29,13 @@ fun RecentlyViewedAnimal.toRecentUiModel(): RecentAnimalUiModel {
         viewedAtLabel = formatRelativeTime(viewedAt),
     )
 }
+
+fun RecentAnimalUiModel.toAnimalUiModel(): AbandonedAnimalUiModel =
+    AbandonedAnimalUiModel(
+        desertionNo = desertionNo,
+        kindName = kindName,
+        processState = processState,
+        shelterName = shelterName,
+        imageUrls = imageUrls,
+        statusType = statusType,
+    )

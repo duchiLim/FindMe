@@ -163,9 +163,42 @@ Route: `shelter/{careRegNo}` — Bottom Bar **숨김**
 │  전화    02-000-0000                 │
 ├─────────────────────────────────────┤
 │  [ 📞 보호소에 전화 ]                │  ← Sticky CTA
-│  [ 🐾 이 보호소 유기동물 보기 ]      │  ← 홈 탭 + 보호소 필터 (Phase 2)
+│  [ 🐾 이 보호소 유기동물 보기 ]      │  ← `shelter/{careRegNo}/animals`
 └─────────────────────────────────────┘
 ```
+
+### 3.6 보호소 유기동물 목록
+
+Route: `shelter/{careRegNo}/animals?shelterName={shelterName}` — Bottom Bar **숨김**
+
+```
+┌─────────────────────────────────────┐
+│  ←  ○○동물보호센터        [보기]     │
+│      유기동물 목록                   │
+├─────────────────────────────────────┤
+│  유기동물 N마리                      │
+│  (2열뷰 / 노멀뷰 / 카드뷰)           │
+└─────────────────────────────────────┘
+```
+
+**목록 보기 형태 (Layout Mode)** — 홈과 동일한 3종, **DataStore 키는 별도** (`shelter_layout_mode`)
+
+| 이름 | 코드 | 컴포넌트 |
+| :--- | :--- | :--- |
+| **2열뷰** | `GRID` | `AnimalCard` |
+| **노멀뷰** | `LIST` | `AnimalListCard` |
+| **카드뷰** | `COVER` | `AnimalCoverCard` |
+
+Top App Bar **보기 전환**: **2열뷰 → 노멀뷰 → 카드뷰 → 2열뷰** (홈·최근 본과 독립 저장)
+
+**구현 위치**
+| 항목 | 경로 |
+| :--- | :--- |
+| Enum | `domain/model/HomeLayoutMode.kt` (공유) |
+| 저장 | `UserPreferencesDataStore` key: `shelter_layout_mode` |
+| UiState | `ShelterAnimalsUiState.layoutMode` |
+| 전환 | `ShelterAnimalsViewModel.toggleLayoutMode()` → `SetShelterLayoutModeUseCase` |
+| UI | `ShelterAnimalsScreen` · `ShelterAnimalsContent` |
 
 ---
 

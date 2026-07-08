@@ -143,11 +143,12 @@ Top App Bar의 **보기 전환** 버튼으로 아래 3가지를 순환합니다.
 | 이름 | 코드 (`HomeLayoutMode`) | 레이아웃 | 컴포넌트 | 사진·텍스트 |
 | :--- | :--- | :--- | :--- | :--- |
 | **2열뷰** | `GRID` | 2열 그리드 (`LazyVerticalGrid`) | `AnimalCard` | **1:1** 정사각형 crop, 텍스트는 카드 하단 |
-| **노멀뷰** | `LIST` | 1열 리스트 (`LazyColumn`) | `AnimalListCard` | 좌측 썸네일 **120dp** + 품종·상태·보호소 **각 1행** |
-| **카드뷰** | `COVER` | 1열 리스트 (`LazyColumn`) | `AnimalCoverCard` | **16:9** 전폭 crop, 텍스트는 하단 그라데이션 위 |
+| **노멀뷰** | `LIST` | 1열 리스트 (`LazyColumn`) | `AnimalListCard` | 좌측 썸네일 **카드 높이에 맞춘 1:1** + 1·2행(품종·상태) **상단** / 3·4행(`happenPlace`·보호소) **하단** |
+| **카드뷰** | `COVER` | 1열 리스트 (`LazyColumn`) | `AnimalCoverCard` | **16:9** 전폭 crop, 하단: 품종·상태 / `happenPlace`(좌) · 보호소(우) |
 
 **공통**
-- 화면 마진 `16.dp`, 카드 간격 `12.dp`, 모서리 `16.dp`, elevation `2.dp`
+- 화면 마진 `16.dp`, **2열뷰·카드뷰** 카드 간격 `12.dp`, 모서리 `16.dp`, elevation `2.dp`
+- **노멀뷰**는 아이템 사이 간격 없음 (연속 리스트)
 - 큐레이션(오늘 등록·입양 임박), 무한 스크롤, 마음에 두기, 검색·필터 **스크롤 접힘** 동작은 세 보기 모두 동일
 - Coil `ContentScale.Crop`으로 비율 영역을 채움
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,6 +49,7 @@ fun AnimalCard(
     showFavoriteToggle: Boolean = false,
     isFavorite: Boolean = false,
     onFavoriteToggleClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
     isDimmed: Boolean = false,
 ) {
     Card(
@@ -92,6 +94,7 @@ fun AnimalCard(
                         modifier = Modifier
                             .align(
                                 when {
+                                    onDeleteClick != null -> Alignment.TopStart
                                     showFavoriteRemove || showFavoriteToggle -> Alignment.TopStart
                                     else -> Alignment.TopEnd
                                 },
@@ -119,7 +122,20 @@ fun AnimalCard(
                     )
                 }
 
-                if (showFavoriteRemove && onFavoriteRemoveClick != null) {
+                if (onDeleteClick != null) {
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = stringResource(R.string.my_recent_delete_item),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                } else if (showFavoriteRemove && onFavoriteRemoveClick != null) {
                     IconButton(
                         onClick = onFavoriteRemoveClick,
                         modifier = Modifier
@@ -155,7 +171,7 @@ fun AnimalCard(
             }
 
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 AnimalKindTitleRow(

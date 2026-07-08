@@ -2,10 +2,13 @@ package com.greenbee.findme.presentation.my
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.usecase.ClearRecentlyViewedUseCase
 import com.greenbee.findme.domain.usecase.ObserveAllRecentlyViewedUseCase
+import com.greenbee.findme.domain.usecase.ObserveRecentLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.RefreshRecentSnapshotsUseCase
 import com.greenbee.findme.domain.usecase.RemoveRecentlyViewedUseCase
+import com.greenbee.findme.domain.usecase.SetRecentLayoutModeUseCase
 import com.greenbee.findme.presentation.my.model.toRecentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,6 +21,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MyRecentViewModel @Inject constructor(
     observeAllRecentlyViewedUseCase: ObserveAllRecentlyViewedUseCase,
+    observeRecentLayoutModeUseCase: ObserveRecentLayoutModeUseCase,
+    private val setRecentLayoutModeUseCase: SetRecentLayoutModeUseCase,
     private val clearRecentlyViewedUseCase: ClearRecentlyViewedUseCase,
     private val removeRecentlyViewedUseCase: RemoveRecentlyViewedUseCase,
     private val refreshRecentSnapshotsUseCase: RefreshRecentSnapshotsUseCase,
@@ -27,6 +32,11 @@ class MyRecentViewModel @Inject constructor(
     val uiState: StateFlow<MyRecentUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            observeRecentLayoutModeUseCase().collect { layoutMode ->
+                _uiState.update { it.copy(layoutMode = layoutMode) }
+            }
+        }
         viewModelScope.launch {
             observeAllRecentlyViewedUseCase().collect { recentlyViewed ->
                 val items = recentlyViewed.map { it.toRecentUiModel() }
@@ -68,6 +78,17 @@ class MyRecentViewModel @Inject constructor(
     fun onRemoveItem(desertionNo: String) {
         viewModelScope.launch {
             removeRecentlyViewedUseCase(desertionNo)
+        }
+    }
+
+    fun toggleLayoutMode() {
+        val nextMode = when (_uiState.value.layoutMode) {
+            HomeLayoutMode.GRID -> HomeLayoutMode.LIST
+            HomeLayoutMode.LIST -> HomeLayoutMode.COVER
+            HomeLayoutMode.COVER -> HomeLayoutMode.GRID
+        }
+        viewModelScope.launch {
+            setRecentLayoutModeUseCase(nextMode)
         }
     }
 }

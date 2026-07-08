@@ -1,6 +1,7 @@
 package com.greenbee.findme.presentation.favorite
 
 import com.greenbee.findme.domain.model.FavoriteAnimal
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.presentation.favorite.model.FavoriteAnimalUiModel
 
 enum class FavoriteSortOrder {
@@ -17,6 +18,7 @@ data class FavoriteUiState(
     val refreshFailedCount: Int = 0,
     val pendingUndoFavorite: FavoriteAnimal? = null,
     val showRemovedSnackbar: Boolean = false,
+    val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID,
 ) {
     val endedCount: Int
         get() = favorites.count { it.isEnded }

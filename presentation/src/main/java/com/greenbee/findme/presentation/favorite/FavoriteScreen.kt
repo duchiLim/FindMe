@@ -3,17 +3,17 @@ package com.greenbee.findme.presentation.favorite
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -29,7 +29,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -39,16 +38,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
-import com.greenbee.findme.presentation.home.component.AnimalCard
+import com.greenbee.findme.presentation.favorite.component.FavoriteAnimalContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +62,8 @@ fun FavoriteScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var isSortMenuExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
 
     LaunchedEffect(uiState.favorites.size) {
         if (uiState.favorites.isNotEmpty()) {
@@ -92,6 +94,23 @@ fun FavoriteScreen(
                 title = { Text(stringResource(R.string.favorite_screen_title)) },
                 actions = {
                     if (!uiState.isEmpty) {
+                        IconButton(onClick = viewModel::toggleLayoutMode) {
+                            val (icon, contentDescriptionRes) = when (uiState.layoutMode) {
+                                HomeLayoutMode.GRID -> {
+                                    Icons.AutoMirrored.Rounded.ViewList to R.string.home_layout_switch_to_list
+                                }
+                                HomeLayoutMode.LIST -> {
+                                    Icons.Rounded.Photo to R.string.home_layout_switch_to_cover
+                                }
+                                HomeLayoutMode.COVER -> {
+                                    Icons.Rounded.GridView to R.string.home_layout_switch_to_grid
+                                }
+                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(contentDescriptionRes),
+                            )
+                        }
                         IconButton(onClick = { isSortMenuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Rounded.MoreVert,
@@ -166,81 +185,16 @@ fun FavoriteScreen(
                     }
 
                     else -> {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                bottom = 16.dp,
-                            ),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                FavoriteSummarySection(
-                                    totalCount = uiState.favorites.size,
-                                    endedCount = uiState.endedCount,
-                                    sortOrder = uiState.sortOrder,
-                                    onCleanupEndedClick = viewModel::clearEndedFavorites,
-                                )
-                            }
-
-                            items(
-                                items = uiState.favorites,
-                                key = { it.desertionNo },
-                            ) { favorite ->
-                                AnimalCard(
-                                    animal = favorite.animal,
-                                    onClick = { onAnimalClick(favorite.desertionNo) },
-                                    showFavoriteRemove = true,
-                                    onFavoriteRemoveClick = { viewModel.removeFavorite(favorite.desertionNo) },
-                                    isDimmed = favorite.isEnded,
-                                )
-                            }
-                        }
+                        FavoriteAnimalContent(
+                            uiState = uiState,
+                            gridState = gridState,
+                            listState = listState,
+                            onAnimalClick = onAnimalClick,
+                            onFavoriteRemoveClick = viewModel::removeFavorite,
+                            onCleanupEndedClick = viewModel::clearEndedFavorites,
+                        )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FavoriteSummarySection(
-    totalCount: Int,
-    endedCount: Int,
-    sortOrder: FavoriteSortOrder,
-    onCleanupEndedClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(
-            text = when (sortOrder) {
-                FavoriteSortOrder.SAVED_AT_DESC -> stringResource(
-                    R.string.favorite_total_count,
-                    totalCount,
-                )
-                FavoriteSortOrder.STATUS_NOTICE_FIRST -> stringResource(
-                    R.string.favorite_total_count_status_sort,
-                    totalCount,
-                )
-            },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        if (endedCount > 0) {
-            Text(
-                text = stringResource(R.string.favorite_ended_count, endedCount),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextButton(onClick = onCleanupEndedClick) {
-                Text(stringResource(R.string.favorite_cleanup_ended))
             }
         }
     }

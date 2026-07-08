@@ -15,4 +15,16 @@ interface UserSettingsRepository {
     fun observeHomeLayoutMode(): Flow<HomeLayoutMode>
 
     suspend fun setHomeLayoutMode(mode: HomeLayoutMode)
+
+    fun observeRecentLayoutMode(): Flow<HomeLayoutMode>
+
+    suspend fun setRecentLayoutMode(mode: HomeLayoutMode)
+
+    fun observeShelterLayoutMode(): Flow<HomeLayoutMode>
+
+    suspend fun setShelterLayoutMode(mode: HomeLayoutMode)
+
+    fun observeFavoriteLayoutMode(): Flow<HomeLayoutMode>
+
+    suspend fun setFavoriteLayoutMode(mode: HomeLayoutMode)
 }

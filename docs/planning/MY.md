@@ -106,21 +106,37 @@ Route: `my/about` — Bottom Bar **숨김**
 └─────────────────────────────────────┘
 ```
 
-### 2.4 최근 본 전체 (Phase 2)
+### 2.4 최근 본 전체 (`my/recent`)
 
 Route: `my/recent` — Bottom Bar **숨김**
 
 ```
 ┌─────────────────────────────────────┐
-│  ←  최근 본 동물          [전체 삭제] │
+│  ←  최근 본 동물    [보기] [전체 삭제] │
 ├─────────────────────────────────────┤
-│ ┌─────────────────────────────────┐ │
-│ │ [사진]  품종 · 🟢 공고중          │ │  ← 1열 컴팩트 리스트
-│ │         보호소명 · 2시간 전       │ │
-│ └─────────────────────────────────┘ │
-│         ...                         │
+│  (2열뷰 / 노멀뷰 / 카드뷰 — 홈과 동일) │
+│  개별 항목 ✕ 로 삭제                  │
 └─────────────────────────────────────┘
 ```
+
+**목록 보기 형태 (Layout Mode)** — 홈과 동일한 3종, **DataStore 키는 별도** (`recent_layout_mode`)
+
+| 이름 | 코드 | 컴포넌트 | 최근 본 전용 |
+| :--- | :--- | :--- | :--- |
+| **2열뷰** | `GRID` | `AnimalCard` | ✕ 삭제 버튼 |
+| **노멀뷰** | `LIST` | `AnimalListCard` | ✕ 삭제 + **본 시각** (`viewedAtLabel`) |
+| **카드뷰** | `COVER` | `AnimalCoverCard` | ✕ 삭제 버튼 |
+
+Top App Bar **보기 전환** 버튼: **2열뷰 → 노멀뷰 → 카드뷰 → 2열뷰** (홈과 동일 순환, 설정값은 독립 저장)
+
+**구현 위치**
+| 항목 | 경로 |
+| :--- | :--- |
+| Enum | `domain/model/HomeLayoutMode.kt` (홈과 공유) |
+| 저장 | `UserPreferencesDataStore` key: `recent_layout_mode` |
+| UiState | `MyRecentUiState.layoutMode` |
+| 전환 | `MyRecentViewModel.toggleLayoutMode()` → `SetRecentLayoutModeUseCase` |
+| UI | `MyRecentScreen` · `MyRecentAnimalContent` |
 
 **레이아웃 원칙** ([DESIGN_GUIDE.md](../DESIGN_GUIDE.md) 준수)
 
@@ -206,6 +222,14 @@ data class RecentAnimalUiModel(
     val statusType: ProcessStateType,
     val viewedAt: Long,
     val viewedAtLabel: String, // "2시간 전" — Presentation mapper
+)
+
+data class MyRecentUiState(
+    val recentAnimals: List<RecentAnimalUiModel> = emptyList(),
+    val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val showClearConfirmDialog: Boolean = false,
+    val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID, // DataStore recent_layout_mode
 )
 ```
 
@@ -330,8 +354,10 @@ const val MY_APPLICATIONS = "my/applications"
 
 ### Phase 2
 
-- [ ] `my/about` · `my/recent` 하위 화면
-- [ ] 최근 본 **전체 삭제** / 개별 삭제
+- [x] `my/recent` 하위 화면 (전체 목록)
+- [x] 최근 본 **전체 삭제** / 개별 삭제
+- [x] 최근 본 **2열뷰·노멀뷰·카드뷰** (DataStore `recent_layout_mode`, 홈과 독립)
+- [ ] `my/about` 하위 화면
 - [ ] 입양·임보 신청 내역 placeholder
 - [ ] 알림 설정 (토글 UI, 실제 푸시는 Phase 3)
 - [ ] 마음에 두기 탭 shortcut

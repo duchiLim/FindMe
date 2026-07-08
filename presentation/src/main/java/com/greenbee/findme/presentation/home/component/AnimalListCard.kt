@@ -7,14 +7,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +56,8 @@ fun AnimalListCard(
     onFavoriteToggleClick: (() -> Unit)? = null,
     showFavoriteRemove: Boolean = false,
     onFavoriteRemoveClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
+    viewedAtLabel: String? = null,
     isDimmed: Boolean = false,
 ) {
     Card(
@@ -62,12 +71,16 @@ fun AnimalListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .height(IntrinsicSize.Min)
+                .padding(top = 6.dp, end = 12.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.Top,
         ) {
             Box(
-                modifier = Modifier.size(120.dp),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .defaultMinSize(minWidth = 120.dp, minHeight = 120.dp)
+                    .aspectRatio(1f),
             ) {
                 AnimalListCardThumbnail(
                     imageUrls = animal.imageUrls,
@@ -105,31 +118,67 @@ fun AnimalListCard(
             }
 
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
             ) {
-                Text(
-                    text = animal.kindName,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                ProcessStateChip(
-                    processState = animal.processState,
-                    statusType = animal.statusType,
-                )
-                Text(
-                    text = animal.shelterName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(
+                        text = animal.kindName,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    ProcessStateChip(
+                        processState = animal.processState,
+                        statusType = animal.statusType,
+                    )
+                    Text(
+                        text = animal.happenPlace.ifBlank {
+                            stringResource(R.string.home_happen_place_unknown)
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(
+                        text = animal.shelterName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (!viewedAtLabel.isNullOrBlank()) {
+                        Text(
+                            text = viewedAtLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             }
 
             when {
+                onDeleteClick != null -> {
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = stringResource(R.string.my_recent_delete_item),
+                        )
+                    }
+                }
                 showFavoriteRemove && onFavoriteRemoveClick != null -> {
                     IconButton(onClick = onFavoriteRemoveClick) {
                         Icon(

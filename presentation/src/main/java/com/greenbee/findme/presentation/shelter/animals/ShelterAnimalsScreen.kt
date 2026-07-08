@@ -3,26 +3,23 @@ package com.greenbee.findme.presentation.shelter.animals
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,8 +37,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.presentation.R
-import com.greenbee.findme.presentation.home.component.AnimalCard
+import com.greenbee.findme.presentation.shelter.animals.component.ShelterAnimalsContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,16 +51,34 @@ fun ShelterAnimalsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
 
-    LaunchedEffect(gridState, uiState.canLoadMore, uiState.isLoading, uiState.isLoadingMore, uiState.animals.size) {
+    LaunchedEffect(
+        gridState,
+        listState,
+        uiState.layoutMode,
+        uiState.canLoadMore,
+        uiState.isLoading,
+        uiState.isLoadingMore,
+        uiState.animals.size,
+    ) {
         if (uiState.isLoading || uiState.animals.isEmpty() || !uiState.canLoadMore) {
             return@LaunchedEffect
         }
 
         snapshotFlow {
-            val layoutInfo = gridState.layoutInfo
-            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+            when (uiState.layoutMode) {
+                HomeLayoutMode.GRID -> {
+                    val layoutInfo = gridState.layoutInfo
+                    val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+                }
+                HomeLayoutMode.LIST, HomeLayoutMode.COVER -> {
+                    val layoutInfo = listState.layoutInfo
+                    val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+                }
+            }
         }.collect { shouldLoadMore ->
             if (shouldLoadMore) {
                 viewModel.loadMore()
@@ -100,6 +116,27 @@ fun ShelterAnimalsScreen(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = stringResource(R.string.detail_back),
                         )
+                    }
+                },
+                actions = {
+                    if (uiState.animals.isNotEmpty()) {
+                        IconButton(onClick = viewModel::toggleLayoutMode) {
+                            val (icon, contentDescriptionRes) = when (uiState.layoutMode) {
+                                HomeLayoutMode.GRID -> {
+                                    Icons.AutoMirrored.Rounded.ViewList to R.string.home_layout_switch_to_list
+                                }
+                                HomeLayoutMode.LIST -> {
+                                    Icons.Rounded.Photo to R.string.home_layout_switch_to_cover
+                                }
+                                HomeLayoutMode.COVER -> {
+                                    Icons.Rounded.GridView to R.string.home_layout_switch_to_grid
+                                }
+                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(contentDescriptionRes),
+                            )
+                        }
                     }
                 },
             )
@@ -142,69 +179,12 @@ fun ShelterAnimalsScreen(
                 }
 
                 else -> {
-                    ShelterAnimalsGrid(
+                    ShelterAnimalsContent(
                         uiState = uiState,
                         gridState = gridState,
+                        listState = listState,
                         onAnimalClick = onAnimalClick,
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShelterAnimalsGrid(
-    uiState: ShelterAnimalsUiState,
-    gridState: LazyGridState,
-    onAnimalClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        if (uiState.isLoadingMore) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            state = gridState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = stringResource(R.string.shelter_animals_total_count, uiState.totalCount),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 4.dp),
-                )
-            }
-
-            items(
-                items = uiState.animals,
-                key = { it.desertionNo },
-            ) { animal ->
-                AnimalCard(
-                    animal = animal,
-                    onClick = { onAnimalClick(animal.desertionNo) },
-                )
-            }
-
-            if (uiState.isLoadingMore) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
                 }
             }
         }

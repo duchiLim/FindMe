@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.model.AbandonedAnimalFilter
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalsUseCase
+import com.greenbee.findme.domain.usecase.ObserveShelterLayoutModeUseCase
+import com.greenbee.findme.domain.usecase.SetShelterLayoutModeUseCase
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,6 +20,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ShelterAnimalsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    observeShelterLayoutModeUseCase: ObserveShelterLayoutModeUseCase,
+    private val setShelterLayoutModeUseCase: SetShelterLayoutModeUseCase,
     private val getAbandonedAnimalsUseCase: GetAbandonedAnimalsUseCase,
 ) : ViewModel() {
 
@@ -32,6 +37,11 @@ class ShelterAnimalsViewModel @Inject constructor(
     private var isRequestInFlight = false
 
     init {
+        viewModelScope.launch {
+            observeShelterLayoutModeUseCase().collect { layoutMode ->
+                _uiState.update { it.copy(layoutMode = layoutMode) }
+            }
+        }
         loadAnimals(reset = true)
     }
 
@@ -48,6 +58,17 @@ class ShelterAnimalsViewModel @Inject constructor(
         val state = _uiState.value
         if (state.isLoading || state.isLoadingMore || !state.canLoadMore || isRequestInFlight) return
         loadAnimals(reset = false)
+    }
+
+    fun toggleLayoutMode() {
+        val nextMode = when (_uiState.value.layoutMode) {
+            HomeLayoutMode.GRID -> HomeLayoutMode.LIST
+            HomeLayoutMode.LIST -> HomeLayoutMode.COVER
+            HomeLayoutMode.COVER -> HomeLayoutMode.GRID
+        }
+        viewModelScope.launch {
+            setShelterLayoutModeUseCase(nextMode)
+        }
     }
 
     private fun loadAnimals(reset: Boolean, fromPullRefresh: Boolean = false) {

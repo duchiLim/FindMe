@@ -3,13 +3,13 @@ package com.greenbee.findme.presentation.my
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
-import com.greenbee.findme.presentation.my.component.RecentAnimalListItem
+import com.greenbee.findme.presentation.my.component.MyRecentAnimalContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +45,9 @@ fun MyRecentScreen(
     viewModel: MyRecentViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
+    val layoutToggleUi = myRecentLayoutToggleUi(uiState.layoutMode)
 
     LaunchedEffect(uiState.recentAnimals.size) {
         if (uiState.recentAnimals.isNotEmpty()) {
@@ -87,6 +90,12 @@ fun MyRecentScreen(
                 },
                 actions = {
                     if (uiState.recentAnimals.isNotEmpty()) {
+                        IconButton(onClick = viewModel::toggleLayoutMode) {
+                            Icon(
+                                imageVector = layoutToggleUi.icon,
+                                contentDescription = stringResource(layoutToggleUi.contentDescriptionRes),
+                            )
+                        }
                         TextButton(onClick = viewModel::onClearAllClick) {
                             Text(stringResource(R.string.my_recent_clear_all))
                         }
@@ -98,7 +107,8 @@ fun MyRecentScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .navigationBarsPadding(),
         ) {
             if (uiState.isRefreshing) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -138,22 +148,14 @@ fun MyRecentScreen(
                 }
 
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        items(
-                            items = uiState.recentAnimals,
-                            key = { it.desertionNo },
-                        ) { animal ->
-                            RecentAnimalListItem(
-                                animal = animal,
-                                onClick = { onAnimalClick(animal.desertionNo) },
-                                onDeleteClick = { viewModel.onRemoveItem(animal.desertionNo) },
-                            )
-                        }
-                    }
+                    MyRecentAnimalContent(
+                        layoutMode = uiState.layoutMode,
+                        recentAnimals = uiState.recentAnimals,
+                        gridState = gridState,
+                        listState = listState,
+                        onAnimalClick = onAnimalClick,
+                        onDeleteClick = viewModel::onRemoveItem,
+                    )
                 }
             }
         }

@@ -44,15 +44,11 @@
 
 ```
 ┌─────────────────────────────────────┐
-│  마음에 둔 동물                       │  ← Top App Bar
+│  마음에 둔 동물              [보기] ⋮ │  ← Top App Bar (보기 전환 + 정렬)
 ├─────────────────────────────────────┤
 │  마음에 둔 동물 3마리 · 최근 추가순    │  ← 결과 요약
 ├─────────────────────────────────────┤
-│ ┌──────────┐  ┌──────────┐         │
-│ │ ♥ [사진] │  │ ♥ [사진] │         │  ← 홈과 동일 2열 AnimalCard
-│ │ 품종 🟢  │  │ 품종 🔵  │         │     + 마음에서 빼기(♥ filled)
-│ │ 보호소명 │  │ 보호소명 │         │
-│ └──────────┘  └──────────┘         │
+│  (2열뷰 / 노멀뷰 / 카드뷰 — 홈과 동일) │
 │         ... (스크롤)                 │
 ├─────────────────────────────────────┤
 │  홈  │ 보호소 │ 마음에 두기 │ 마이   │  ← Bottom Nav (유지)
@@ -100,9 +96,28 @@
 
 **레이아웃 원칙** ([DESIGN_GUIDE.md](../DESIGN_GUIDE.md) 준수)
 
-- 홈 탭과 **동일한 2열 그리드·카드 스펙** (`AnimalCard` 재사용)
+- 홈과 **동일한 3종 보기** (`AnimalCard` / `AnimalListCard` / `AnimalCoverCard` 재사용)
 - ♥ 아이콘: Primary `#FFAB91` / filled 시 `#FF8A65`
 - 화면 마진 `16.dp`, 카드 간격 `12.dp`, 모서리 `16.dp`
+
+**목록 보기 형태 (Layout Mode)** — 홈과 동일한 3종, **DataStore 키는 별도** (`favorite_layout_mode`)
+
+| 이름 | 코드 | 컴포넌트 | 마음에 두기 전용 |
+| :--- | :--- | :--- | :--- |
+| **2열뷰** | `GRID` | `AnimalCard` | ♥ 제거 버튼 |
+| **노멀뷰** | `LIST` | `AnimalListCard` | ♥ 제거 버튼 |
+| **카드뷰** | `COVER` | `AnimalCoverCard` | ♥ 제거 버튼 |
+
+Top App Bar **보기 전환**: **2열뷰 → 노멀뷰 → 카드뷰 → 2열뷰** (홈·최근 본·보호소 목록과 독립 저장)
+
+**구현 위치**
+| 항목 | 경로 |
+| :--- | :--- |
+| Enum | `domain/model/HomeLayoutMode.kt` (공유) |
+| 저장 | `UserPreferencesDataStore` key: `favorite_layout_mode` |
+| UiState | `FavoriteUiState.layoutMode` |
+| 전환 | `FavoriteViewModel.toggleLayoutMode()` → `SetFavoriteLayoutModeUseCase` |
+| UI | `FavoriteScreen` · `FavoriteAnimalContent` |
 
 ---
 
@@ -113,7 +128,8 @@
 | 요소 | MVP | Phase 2 |
 | :--- | :---: | :---: |
 | 타이틀 | `마음에 둔 동물` (`favorite_screen_title`) | 동일 |
-| 정렬 | 🔲 (고정: 최근 추가순) | 메뉴: 최근 추가순 / 공고 상태순 |
+| 보기 전환 | ✅ 2열뷰 / 노멀뷰 / 카드뷰 (`favorite_layout_mode`) | 동일 |
+| 정렬 | ✅ 최근 추가순 / 공고 상태순 | 동일 |
 | 편집 | 🔲 | 다중 선택 삭제 |
 
 ### 3.2 결과 요약
@@ -156,6 +172,7 @@ data class FavoriteUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val sortOrder: FavoriteSortOrder = FavoriteSortOrder.SAVED_AT_DESC,
+    val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID, // DataStore favorite_layout_mode
     val errorMessage: String? = null,
     val endedCount: Int = 0,
 )
@@ -304,6 +321,7 @@ data class FavoriteAnimal(
 
 **마음에 두기 탭**
 - [x] `FavoriteScreen` + `FavoriteViewModel` + `FavoriteUiState`
+- [x] **2열뷰·노멀뷰·카드뷰** (DataStore `favorite_layout_mode`, 홈과 독립)
 - [x] 2열 그리드 (`AnimalCard` + ♥ 제거 버튼)
 - [x] Empty UI + 홈 탭 CTA
 - [x] 카드 탭 → 동물 상세

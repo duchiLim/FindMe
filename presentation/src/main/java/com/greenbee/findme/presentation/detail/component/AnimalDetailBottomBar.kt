@@ -1,6 +1,7 @@
 package com.greenbee.findme.presentation.detail.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +20,9 @@ fun AnimalDetailBottomBar(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding(),
         shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surface,
     ) {

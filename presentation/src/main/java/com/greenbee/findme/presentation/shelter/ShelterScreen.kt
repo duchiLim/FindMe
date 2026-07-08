@@ -33,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -115,69 +114,24 @@ fun ShelterScreen(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.nav_shelter)) },
-                    actions = {
-                        IconButton(onClick = { requestNearbyShelters() }) {
-                            Icon(
-                                imageVector = Icons.Rounded.MyLocation,
-                                contentDescription = stringResource(R.string.shelter_nearby_action),
-                            )
-                        }
-                        IconButton(onClick = viewModel::onRegionFilterClick) {
-                            Icon(
-                                imageVector = Icons.Rounded.FilterList,
-                                contentDescription = stringResource(R.string.shelter_select_region),
-                            )
-                        }
-                    },
-                )
-                ShelterFilterChips(
-                    listMode = uiState.listMode,
-                    sortMode = uiState.sortMode,
-                    canSortByDistance = uiState.userLocation != null,
-                    onListModeSelected = viewModel::onListModeSelected,
-                    onSortModeSelected = viewModel::onSortModeSelected,
-                    onRequestLocation = { requestNearbyShelters() },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-                if (showSearch) {
-                    SearchBar(
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = uiState.searchQuery,
-                                onQueryChange = viewModel::onSearchQueryChange,
-                                onSearch = {},
-                                expanded = false,
-                                onExpandedChange = {},
-                                placeholder = { Text(stringResource(R.string.shelter_search_hint)) },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Search,
-                                        contentDescription = null,
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (uiState.searchQuery.isNotBlank()) {
-                                        IconButton(onClick = viewModel::clearSearch) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Close,
-                                                contentDescription = stringResource(R.string.shelter_search_clear),
-                                            )
-                                        }
-                                    }
-                                },
-                            )
-                        },
-                        expanded = false,
-                        onExpandedChange = {},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                    ) {}
-                }
-            }
+            TopAppBar(
+                windowInsets = WindowInsets(0),
+                title = { Text(stringResource(R.string.nav_shelter)) },
+                actions = {
+                    IconButton(onClick = { requestNearbyShelters() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.MyLocation,
+                            contentDescription = stringResource(R.string.shelter_nearby_action),
+                        )
+                    }
+                    IconButton(onClick = viewModel::onRegionFilterClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.FilterList,
+                            contentDescription = stringResource(R.string.shelter_select_region),
+                        )
+                    }
+                },
+            )
         },
     ) { innerPadding ->
         Column(
@@ -185,6 +139,45 @@ fun ShelterScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            ShelterFilterChips(
+                listMode = uiState.listMode,
+                sortMode = uiState.sortMode,
+                canSortByDistance = uiState.userLocation != null,
+                onListModeSelected = viewModel::onListModeSelected,
+                onSortModeSelected = viewModel::onSortModeSelected,
+                onRequestLocation = { requestNearbyShelters() },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+            if (showSearch) {
+                SearchBarDefaults.InputField(
+                    query = uiState.searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChange,
+                    onSearch = {},
+                    expanded = false,
+                    onExpandedChange = {},
+                    placeholder = { Text(stringResource(R.string.shelter_search_hint)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingIcon = {
+                        if (uiState.searchQuery.isNotBlank()) {
+                            IconButton(onClick = viewModel::clearSearch) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = stringResource(R.string.shelter_search_clear),
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
+
             if (uiState.regionSummary.isNotBlank() && uiState.listMode == ShelterListMode.ALL) {
                 Text(
                     text = uiState.regionSummary,

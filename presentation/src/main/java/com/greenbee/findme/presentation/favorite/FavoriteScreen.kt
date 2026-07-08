@@ -24,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
+import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.home.component.AnimalCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,10 +72,9 @@ fun FavoriteScreen(
     LaunchedEffect(uiState.showRemovedSnackbar) {
         if (!uiState.showRemovedSnackbar) return@LaunchedEffect
 
-        val result = snackbarHostState.showSnackbar(
+        val result = snackbarHostState.showSnackbarWithAutoDismiss(
             message = context.getString(R.string.favorite_removed_message),
             actionLabel = context.getString(R.string.favorite_undo),
-            duration = SnackbarDuration.Short,
         )
         when (result) {
             SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
@@ -89,6 +88,7 @@ fun FavoriteScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = { Text(stringResource(R.string.favorite_screen_title)) },
                 actions = {
                     if (!uiState.isEmpty) {

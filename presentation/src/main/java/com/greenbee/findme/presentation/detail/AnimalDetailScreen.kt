@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
+import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.detail.component.AnimalDetailBottomBar
 import com.greenbee.findme.presentation.detail.component.AnimalDetailGallery
 import com.greenbee.findme.presentation.detail.component.DetailInfoRow
@@ -70,10 +71,9 @@ fun AnimalDetailScreen(
                 viewModel.onFavoriteMessageShown()
             }
             FavoriteMessage.REMOVED -> {
-                val result = snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
                     message = context.getString(R.string.favorite_removed_message),
                     actionLabel = context.getString(R.string.favorite_undo),
-                    duration = SnackbarDuration.Short,
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
@@ -104,9 +104,11 @@ fun AnimalDetailScreen(
 
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     val animal = uiState.animal
                     if (animal != null) {

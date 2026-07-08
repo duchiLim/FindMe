@@ -32,10 +32,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
+import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.home.component.AnimalCard
 import com.greenbee.findme.presentation.home.component.HomeAdvancedFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeCurationSection
@@ -84,21 +85,21 @@ fun HomeScreen(
     LaunchedEffect(uiState.favoriteSnackbar) {
         when (uiState.favoriteSnackbar) {
             HomeFavoriteSnackbar.ADDED -> {
-                val result = snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
                     message = context.getString(R.string.favorite_added_message),
                     actionLabel = context.getString(R.string.favorite_view_list),
                 )
-                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                if (result == SnackbarResult.ActionPerformed) {
                     onNavigateToFavorite()
                 }
                 viewModel.onFavoriteSnackbarShown()
             }
             HomeFavoriteSnackbar.REMOVED -> {
-                val result = snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
                     message = context.getString(R.string.favorite_removed_message),
                     actionLabel = context.getString(R.string.favorite_undo),
                 )
-                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                if (result == SnackbarResult.ActionPerformed) {
                     viewModel.undoRemoveFavorite()
                 } else {
                     viewModel.onFavoriteSnackbarShown()
@@ -129,10 +130,10 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.home_screen_title)) },
-                    actions = {
+            TopAppBar(
+                windowInsets = WindowInsets(0),
+                title = { Text(stringResource(R.string.home_screen_title)) },
+                actions = {
                         if (uiState.isRecentViewingEnabled) {
                             IconButton(onClick = onNavigateToRecent) {
                                 Icon(
@@ -191,43 +192,37 @@ fun HomeScreen(
                         }
                     },
                 )
-                SearchBar(
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = uiState.searchQuery,
-                            onQueryChange = viewModel::onSearchQueryChange,
-                            onSearch = {},
-                            expanded = false,
-                            onExpandedChange = {},
-                            placeholder = { Text(stringResource(R.string.home_search_hint)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Rounded.Search,
-                                    contentDescription = null,
-                                )
-                            },
-                            trailingIcon = {
-                                if (uiState.searchQuery.isNotBlank()) {
-                                    IconButton(onClick = viewModel::clearSearch) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Close,
-                                            contentDescription = stringResource(R.string.home_search_clear),
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                    },
-                    expanded = false,
-                    onExpandedChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                ) {}
-            }
         },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            SearchBarDefaults.InputField(
+                query = uiState.searchQuery,
+                onQueryChange = viewModel::onSearchQueryChange,
+                onSearch = {},
+                expanded = false,
+                onExpandedChange = {},
+                placeholder = { Text(stringResource(R.string.home_search_hint)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Search,
+                        contentDescription = null,
+                    )
+                },
+                trailingIcon = {
+                    if (uiState.searchQuery.isNotBlank()) {
+                        IconButton(onClick = viewModel::clearSearch) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = stringResource(R.string.home_search_clear),
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+
             HomeFilterBar(
             activeRegionFilterCount = uiState.activeRegionFilterCount,
             selectedUpKind = uiState.selectedUpKind,
@@ -378,16 +373,6 @@ private fun HomeContent(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        HomeResultSummary(
-                            totalCount = uiState.totalCount,
-                            displayCount = uiState.displayAnimals.size,
-                            filterSummary = uiState.filterSummary,
-                            searchQuery = uiState.searchQuery,
-                            sortOrder = uiState.sortOrder,
-                        )
-                    }
-
                     if (uiState.searchQuery.isBlank()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             HomeCurationSection(
@@ -441,53 +426,6 @@ private fun HomeContent(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun HomeResultSummary(
-    totalCount: Int,
-    displayCount: Int,
-    filterSummary: String,
-    searchQuery: String,
-    sortOrder: HomeSortOrder,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(
-            text = if (searchQuery.isNotBlank()) {
-                stringResource(R.string.home_search_result_count, displayCount)
-            } else {
-                stringResource(R.string.home_total_count, totalCount)
-            },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        val sortLabel = when (sortOrder) {
-            HomeSortOrder.LATEST -> null
-            HomeSortOrder.NOTICE_END_SOON -> stringResource(R.string.home_sort_notice_end)
-            HomeSortOrder.STATUS_NOTICE_FIRST -> stringResource(R.string.home_sort_status)
-        }
-        val summaryParts = buildList {
-            if (searchQuery.isNotBlank()) {
-                add("\"$searchQuery\"")
-            }
-            if (filterSummary.isNotBlank()) {
-                add(filterSummary)
-            }
-            sortLabel?.let(::add)
-        }
-        if (summaryParts.isNotEmpty()) {
-            Text(
-                text = summaryParts.joinToString(separator = " · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

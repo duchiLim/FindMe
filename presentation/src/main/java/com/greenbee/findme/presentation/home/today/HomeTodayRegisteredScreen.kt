@@ -25,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -46,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
+import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.home.HomeFavoriteSnackbar
 import com.greenbee.findme.presentation.home.component.AnimalCard
 
@@ -66,7 +66,7 @@ fun HomeTodayRegisteredScreen(
     LaunchedEffect(uiState.favoriteSnackbar) {
         when (uiState.favoriteSnackbar) {
             HomeFavoriteSnackbar.ADDED -> {
-                val result = snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
                     message = context.getString(R.string.favorite_added_message),
                     actionLabel = context.getString(R.string.favorite_view_list),
                 )
@@ -76,10 +76,9 @@ fun HomeTodayRegisteredScreen(
                 viewModel.onFavoriteSnackbarShown()
             }
             HomeFavoriteSnackbar.REMOVED -> {
-                val result = snackbarHostState.showSnackbar(
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
                     message = context.getString(R.string.favorite_removed_message),
                     actionLabel = context.getString(R.string.favorite_undo),
-                    duration = SnackbarDuration.Short,
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
@@ -112,6 +111,7 @@ fun HomeTodayRegisteredScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = { Text(stringResource(R.string.home_today_screen_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -193,7 +193,6 @@ private fun TodayRegisteredGrid(
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = 8.dp,
                 bottom = 16.dp,
             ),
             horizontalArrangement = Arrangement.spacedBy(12.dp),

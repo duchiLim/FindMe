@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.HomeRegionFilter
 import com.greenbee.findme.domain.model.Region
@@ -129,6 +130,17 @@ class UserPreferencesDataStore @Inject constructor(
         }
     }
 
+    suspend fun getHomeDateRangeFilter(): HomeDateRange {
+        val preferences = context.userPreferencesDataStore.data.first()
+        return HomeDateRange.fromStored(preferences[KEY_HOME_DATE_RANGE])
+    }
+
+    suspend fun setHomeDateRangeFilter(dateRange: HomeDateRange) {
+        context.userPreferencesDataStore.edit { preferences ->
+            preferences[KEY_HOME_DATE_RANGE] = dateRange.name
+        }
+    }
+
     private companion object {
         val KEY_HOME_LAYOUT_MODE = stringPreferencesKey("home_layout_mode")
         val KEY_RECENT_LAYOUT_MODE = stringPreferencesKey("recent_layout_mode")
@@ -140,5 +152,6 @@ class UserPreferencesDataStore @Inject constructor(
         val KEY_HOME_SIGUNGU_NAME = stringPreferencesKey("home_sigungu_name")
         val KEY_HOME_SIGUNGU_PARENT_CODE = stringPreferencesKey("home_sigungu_parent_code")
         val KEY_HOME_UP_KIND = stringPreferencesKey("home_up_kind")
+        val KEY_HOME_DATE_RANGE = stringPreferencesKey("home_date_range")
     }
 }

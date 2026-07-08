@@ -1,11 +1,11 @@
 package com.greenbee.findme.presentation.home
 
 import com.greenbee.findme.domain.model.AbandonmentState
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
-import com.greenbee.findme.presentation.home.model.HomeDateRange
 import com.greenbee.findme.presentation.home.model.HomeSortOrder
 import com.greenbee.findme.presentation.home.model.filterBySearch
 import com.greenbee.findme.presentation.home.model.isAdoptionImminent

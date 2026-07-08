@@ -1,5 +1,6 @@
 package com.greenbee.findme.domain.usecase
 
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeRegionFilter
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.domain.repository.UserSettingsRepository
@@ -30,5 +31,19 @@ class SetHomeUpKindFilterUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(upKind: UpKind?) {
         repository.setHomeUpKindFilter(upKind)
+    }
+}
+
+class GetHomeDateRangeFilterUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    suspend operator fun invoke(): HomeDateRange = repository.getHomeDateRangeFilter()
+}
+
+class SetHomeDateRangeFilterUseCase @Inject constructor(
+    private val repository: UserSettingsRepository,
+) {
+    suspend operator fun invoke(dateRange: HomeDateRange) {
+        repository.setHomeDateRangeFilter(dateRange)
     }
 }

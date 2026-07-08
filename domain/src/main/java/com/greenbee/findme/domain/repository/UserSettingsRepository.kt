@@ -1,5 +1,6 @@
 package com.greenbee.findme.domain.repository
 
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.HomeRegionFilter
 import com.greenbee.findme.domain.model.UpKind
@@ -37,4 +38,8 @@ interface UserSettingsRepository {
     suspend fun getHomeUpKindFilter(): UpKind?
 
     suspend fun setHomeUpKindFilter(upKind: UpKind?)
+
+    suspend fun getHomeDateRangeFilter(): HomeDateRange
+
+    suspend fun setHomeDateRangeFilter(dateRange: HomeDateRange)
 }

@@ -26,7 +26,7 @@ import com.greenbee.findme.domain.model.AbandonmentState
 import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.presentation.R
-import com.greenbee.findme.presentation.home.model.HomeDateRange
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.presentation.ui.theme.FindMeOnPrimary
 import com.greenbee.findme.presentation.ui.theme.FindMePrimary
 

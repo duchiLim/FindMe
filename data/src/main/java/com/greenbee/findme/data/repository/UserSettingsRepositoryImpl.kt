@@ -2,6 +2,7 @@ package com.greenbee.findme.data.repository
 
 import com.greenbee.findme.data.settings.UserPreferencesDataStore
 import com.greenbee.findme.data.settings.UserSettingsDataSource
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.HomeRegionFilter
 import com.greenbee.findme.domain.model.UpKind
@@ -68,5 +69,12 @@ class UserSettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setHomeUpKindFilter(upKind: UpKind?) {
         preferencesDataStore.setHomeUpKindFilter(upKind)
+    }
+
+    override suspend fun getHomeDateRangeFilter(): HomeDateRange =
+        preferencesDataStore.getHomeDateRangeFilter()
+
+    override suspend fun setHomeDateRangeFilter(dateRange: HomeDateRange) {
+        preferencesDataStore.setHomeDateRangeFilter(dateRange)
     }
 }

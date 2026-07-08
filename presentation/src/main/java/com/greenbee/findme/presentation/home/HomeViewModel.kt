@@ -15,17 +15,19 @@ import com.greenbee.findme.domain.usecase.GetSidoListUseCase
 import com.greenbee.findme.domain.usecase.GetSigunguListUseCase
 import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
+import com.greenbee.findme.domain.model.HomeDateRange
 import com.greenbee.findme.domain.model.HomeRegionFilter
+import com.greenbee.findme.domain.usecase.GetHomeDateRangeFilterUseCase
 import com.greenbee.findme.domain.usecase.GetHomeRegionFilterUseCase
 import com.greenbee.findme.domain.usecase.GetHomeUpKindFilterUseCase
 import com.greenbee.findme.domain.usecase.ObserveHomeLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.SaveHomeListCacheUseCase
 import com.greenbee.findme.domain.usecase.SetHomeLayoutModeUseCase
+import com.greenbee.findme.domain.usecase.SetHomeDateRangeFilterUseCase
 import com.greenbee.findme.domain.usecase.SetHomeRegionFilterUseCase
 import com.greenbee.findme.domain.usecase.SetHomeUpKindFilterUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
-import com.greenbee.findme.presentation.home.model.HomeDateRange
 import com.greenbee.findme.presentation.home.model.HomeSortOrder
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,6 +53,8 @@ class HomeViewModel @Inject constructor(
     private val setHomeRegionFilterUseCase: SetHomeRegionFilterUseCase,
     private val getHomeUpKindFilterUseCase: GetHomeUpKindFilterUseCase,
     private val setHomeUpKindFilterUseCase: SetHomeUpKindFilterUseCase,
+    private val getHomeDateRangeFilterUseCase: GetHomeDateRangeFilterUseCase,
+    private val setHomeDateRangeFilterUseCase: SetHomeDateRangeFilterUseCase,
     private val getHomeListCacheUseCase: GetHomeListCacheUseCase,
     private val saveHomeListCacheUseCase: SaveHomeListCacheUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -218,6 +222,7 @@ class HomeViewModel @Inject constructor(
             val state = _uiState.value
             setHomeRegionFilterUseCase(HomeRegionFilter(state.draftSido, state.draftSigungu))
             setHomeUpKindFilterUseCase(state.draftUpKind)
+            setHomeDateRangeFilterUseCase(state.draftDateRange)
             _uiState.update {
                 it.copy(
                     selectedSido = it.draftSido,
@@ -350,6 +355,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setHomeRegionFilterUseCase(HomeRegionFilter())
             setHomeUpKindFilterUseCase(null)
+            setHomeDateRangeFilterUseCase(HomeDateRange.DAYS_30)
             _uiState.update {
                 it.copy(
                     selectedUpKind = null,
@@ -385,6 +391,7 @@ class HomeViewModel @Inject constructor(
 
         val savedRegion = getHomeRegionFilterUseCase()
         val savedUpKind = getHomeUpKindFilterUseCase()
+        val savedDateRange = getHomeDateRangeFilterUseCase()
 
         val resolvedSido = savedRegion.sido?.let { saved ->
             sidoList.find { it.code == saved.code } ?: saved
@@ -406,9 +413,11 @@ class HomeViewModel @Inject constructor(
                 selectedSido = resolvedSido,
                 selectedSigungu = resolvedSigungu,
                 selectedUpKind = savedUpKind,
+                selectedDateRange = savedDateRange,
                 draftSido = resolvedSido,
                 draftSigungu = resolvedSigungu,
                 draftUpKind = savedUpKind,
+                draftDateRange = savedDateRange,
             )
         }
     }

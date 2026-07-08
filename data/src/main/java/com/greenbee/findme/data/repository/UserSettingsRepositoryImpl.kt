@@ -3,6 +3,8 @@ package com.greenbee.findme.data.repository
 import com.greenbee.findme.data.settings.UserPreferencesDataStore
 import com.greenbee.findme.data.settings.UserSettingsDataSource
 import com.greenbee.findme.domain.model.HomeLayoutMode
+import com.greenbee.findme.domain.model.HomeRegionFilter
+import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.domain.repository.UserSettingsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -52,5 +54,19 @@ class UserSettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setFavoriteLayoutMode(mode: HomeLayoutMode) {
         preferencesDataStore.setFavoriteLayoutMode(mode)
+    }
+
+    override suspend fun getHomeRegionFilter(): HomeRegionFilter =
+        preferencesDataStore.getHomeRegionFilter()
+
+    override suspend fun setHomeRegionFilter(filter: HomeRegionFilter) {
+        preferencesDataStore.setHomeRegionFilter(filter)
+    }
+
+    override suspend fun getHomeUpKindFilter(): UpKind? =
+        preferencesDataStore.getHomeUpKindFilter()
+
+    override suspend fun setHomeUpKindFilter(upKind: UpKind?) {
+        preferencesDataStore.setHomeUpKindFilter(upKind)
     }
 }

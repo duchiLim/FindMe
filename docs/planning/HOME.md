@@ -92,6 +92,19 @@
 
 **기본 기간:** 미지정 시 **최근 30일** (Repository 기본값과 동일)
 
+#### 필터 저장 (DataStore)
+
+홈 탭 **지역·축종** 선택은 앱 재시작 후에도 유지됩니다. (상태·기간·검색은 세션 내 유지)
+
+| 항목 | DataStore key | UseCase |
+| :--- | :--- | :--- |
+| 시·도 | `home_sido_code`, `home_sido_name` | `SetHomeRegionFilterUseCase` |
+| 시·군·구 | `home_sigungu_code`, `home_sigungu_name`, `home_sigungu_parent_code` | 동일 |
+| 축종 | `home_up_kind` (`UpKind` enum name) | `SetHomeUpKindFilterUseCase` |
+
+- 저장 시점: 지역/축종/상세 필터 **적용** · `clearFilters()` 시 초기화
+- 복원: `HomeViewModel` 진입 시 `GetHomeRegionFilterUseCase` · `GetHomeUpKindFilterUseCase`
+
 ### 3.3 결과 요약 바
 | 표시 | 예시 |
 | :--- | :--- |

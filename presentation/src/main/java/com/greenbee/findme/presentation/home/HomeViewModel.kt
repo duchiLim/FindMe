@@ -15,10 +15,15 @@ import com.greenbee.findme.domain.usecase.GetSidoListUseCase
 import com.greenbee.findme.domain.usecase.GetSigunguListUseCase
 import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
+import com.greenbee.findme.domain.model.HomeRegionFilter
+import com.greenbee.findme.domain.usecase.GetHomeRegionFilterUseCase
+import com.greenbee.findme.domain.usecase.GetHomeUpKindFilterUseCase
 import com.greenbee.findme.domain.usecase.ObserveHomeLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.SaveHomeListCacheUseCase
 import com.greenbee.findme.domain.usecase.SetHomeLayoutModeUseCase
+import com.greenbee.findme.domain.usecase.SetHomeRegionFilterUseCase
+import com.greenbee.findme.domain.usecase.SetHomeUpKindFilterUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.home.model.HomeDateRange
 import com.greenbee.findme.presentation.home.model.HomeSortOrder
@@ -42,6 +47,10 @@ class HomeViewModel @Inject constructor(
     getUserSettingsUseCase: GetUserSettingsUseCase,
     observeHomeLayoutModeUseCase: ObserveHomeLayoutModeUseCase,
     private val setHomeLayoutModeUseCase: SetHomeLayoutModeUseCase,
+    private val getHomeRegionFilterUseCase: GetHomeRegionFilterUseCase,
+    private val setHomeRegionFilterUseCase: SetHomeRegionFilterUseCase,
+    private val getHomeUpKindFilterUseCase: GetHomeUpKindFilterUseCase,
+    private val setHomeUpKindFilterUseCase: SetHomeUpKindFilterUseCase,
     private val getHomeListCacheUseCase: GetHomeListCacheUseCase,
     private val saveHomeListCacheUseCase: SaveHomeListCacheUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -61,8 +70,8 @@ class HomeViewModel @Inject constructor(
         val settings = getUserSettingsUseCase()
         _uiState.update { it.copy(isRecentViewingEnabled = settings.isRecentViewingEnabled) }
 
-        loadSidoList()
         viewModelScope.launch {
+            restoreSavedFilters()
             getHomeListCacheUseCase()?.let { cache ->
                 _uiState.update {
                     it.copy(
@@ -74,8 +83,8 @@ class HomeViewModel @Inject constructor(
                 }
                 latestDomainAnimals = cache.animals
             }
+            loadAnimals(reset = true)
         }
-        loadAnimals(reset = true)
         viewModelScope.launch {
             observeHomeLayoutModeUseCase().collect { layoutMode ->
                 _uiState.update { it.copy(layoutMode = layoutMode) }
@@ -205,17 +214,22 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onApplyAdvancedFilter() {
-        _uiState.update {
-            it.copy(
-                selectedSido = it.draftSido,
-                selectedSigungu = it.draftSigungu,
-                selectedUpKind = it.draftUpKind,
-                selectedState = it.draftState,
-                selectedDateRange = it.draftDateRange,
-                isAdvancedFilterSheetVisible = false,
-            )
+        viewModelScope.launch {
+            val state = _uiState.value
+            setHomeRegionFilterUseCase(HomeRegionFilter(state.draftSido, state.draftSigungu))
+            setHomeUpKindFilterUseCase(state.draftUpKind)
+            _uiState.update {
+                it.copy(
+                    selectedSido = it.draftSido,
+                    selectedSigungu = it.draftSigungu,
+                    selectedUpKind = it.draftUpKind,
+                    selectedState = it.draftState,
+                    selectedDateRange = it.draftDateRange,
+                    isAdvancedFilterSheetVisible = false,
+                )
+            }
+            loadAnimals(reset = true)
         }
-        loadAnimals(reset = true)
     }
 
     fun onRegionFilterClick() {
@@ -294,24 +308,32 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onApplyRegionFilter() {
-        _uiState.update {
-            it.copy(
-                selectedSido = it.draftSido,
-                selectedSigungu = it.draftSigungu,
-                isRegionFilterSheetVisible = false,
-            )
+        viewModelScope.launch {
+            val state = _uiState.value
+            setHomeRegionFilterUseCase(HomeRegionFilter(state.draftSido, state.draftSigungu))
+            _uiState.update {
+                it.copy(
+                    selectedSido = it.draftSido,
+                    selectedSigungu = it.draftSigungu,
+                    isRegionFilterSheetVisible = false,
+                )
+            }
+            loadAnimals(reset = true)
         }
-        loadAnimals(reset = true)
     }
 
     fun onApplyUpKindFilter() {
-        _uiState.update {
-            it.copy(
-                selectedUpKind = it.draftUpKind,
-                isUpKindFilterSheetVisible = false,
-            )
+        viewModelScope.launch {
+            val upKind = _uiState.value.draftUpKind
+            setHomeUpKindFilterUseCase(upKind)
+            _uiState.update {
+                it.copy(
+                    selectedUpKind = upKind,
+                    isUpKindFilterSheetVisible = false,
+                )
+            }
+            loadAnimals(reset = true)
         }
-        loadAnimals(reset = true)
     }
 
     fun loadMore() {
@@ -325,23 +347,27 @@ class HomeViewModel @Inject constructor(
             retry()
             return
         }
-        _uiState.update {
-            it.copy(
-                selectedUpKind = null,
-                selectedState = null,
-                selectedSido = null,
-                selectedSigungu = null,
-                selectedDateRange = HomeDateRange.DAYS_30,
-                draftSido = null,
-                draftSigungu = null,
-                draftUpKind = null,
-                draftState = null,
-                draftDateRange = HomeDateRange.DAYS_30,
-                sigunguList = emptyList(),
-                searchQuery = "",
-            )
+        viewModelScope.launch {
+            setHomeRegionFilterUseCase(HomeRegionFilter())
+            setHomeUpKindFilterUseCase(null)
+            _uiState.update {
+                it.copy(
+                    selectedUpKind = null,
+                    selectedState = null,
+                    selectedSido = null,
+                    selectedSigungu = null,
+                    selectedDateRange = HomeDateRange.DAYS_30,
+                    draftSido = null,
+                    draftSigungu = null,
+                    draftUpKind = null,
+                    draftState = null,
+                    draftDateRange = HomeDateRange.DAYS_30,
+                    sigunguList = emptyList(),
+                    searchQuery = "",
+                )
+            }
+            loadAnimals(reset = true)
         }
-        loadAnimals(reset = true)
     }
 
     fun retry() {
@@ -351,6 +377,40 @@ class HomeViewModel @Inject constructor(
     fun refresh() {
         if (isRequestInFlight || _uiState.value.isRefreshing) return
         loadAnimals(reset = true, fromPullRefresh = true)
+    }
+
+    private suspend fun restoreSavedFilters() {
+        _uiState.update { it.copy(isSidoListLoading = true) }
+        val sidoList = runCatching { getSidoListUseCase().items }.getOrElse { emptyList() }
+
+        val savedRegion = getHomeRegionFilterUseCase()
+        val savedUpKind = getHomeUpKindFilterUseCase()
+
+        val resolvedSido = savedRegion.sido?.let { saved ->
+            sidoList.find { it.code == saved.code } ?: saved
+        }
+        val sigunguList = if (resolvedSido != null) {
+            runCatching { getSigunguListUseCase(resolvedSido.code).items }.getOrElse { emptyList() }
+        } else {
+            emptyList()
+        }
+        val resolvedSigungu = savedRegion.sigungu?.let { saved ->
+            sigunguList.find { it.code == saved.code } ?: saved
+        }
+
+        _uiState.update {
+            it.copy(
+                sidoList = sidoList,
+                sigunguList = sigunguList,
+                isSidoListLoading = false,
+                selectedSido = resolvedSido,
+                selectedSigungu = resolvedSigungu,
+                selectedUpKind = savedUpKind,
+                draftSido = resolvedSido,
+                draftSigungu = resolvedSigungu,
+                draftUpKind = savedUpKind,
+            )
+        }
     }
 
     private fun loadSidoList() {

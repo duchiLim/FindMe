@@ -1,6 +1,7 @@
 package com.greenbee.findme.presentation.home
 
 import com.greenbee.findme.domain.model.AbandonmentState
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
@@ -46,6 +47,7 @@ data class HomeUiState(
     val isRecentViewingEnabled: Boolean = true,
     val searchQuery: String = "",
     val sortOrder: HomeSortOrder = HomeSortOrder.LATEST,
+    val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID,
 ) {
     val displayAnimals: List<AbandonedAnimalUiModel>
         get() = animals.filterBySearch(searchQuery).sortedBy(sortOrder)

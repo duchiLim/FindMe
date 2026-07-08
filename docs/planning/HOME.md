@@ -52,7 +52,7 @@
 - 화면 마진: `16.dp`
 - 카드 모서리: `16.dp`, elevation `2~4.dp`
 - 카드 간격: `12.dp` (그리드 gutter)
-- 사진 비율: **1:1** 정사각형 크롭 (리스트 일관성)
+- 사진 비율: 보기 형태별 상이 — **2열뷰 1:1**, **카드뷰 16:9**, **노멀뷰 썸네일 정사각** (§3.6)
 
 ---
 
@@ -130,10 +130,46 @@
 ### 3.5 리스트 레이아웃
 | 항목 | 권장 |
 | :--- | :--- |
-| 형태 | **LazyVerticalGrid**, `GridCells.Fixed(2)` |
+| 형태 | **LazyVerticalGrid**, `GridCells.Fixed(2)` (기본 **2열뷰**) |
 | 페이지 크기 | `numOfRows = 20` |
 | 더 불러오기 | 스크롤 하단 도달 시 `pageNo++` (무한 스크롤) |
 | Pull-to-refresh | Phase 2 (`SwipeRefresh`) |
+
+### 3.6 목록 보기 형태 (Layout Mode)
+
+Top App Bar의 **보기 전환** 버튼으로 아래 3가지를 순환합니다.  
+**2열뷰 → 노멀뷰 → 카드뷰 → 2열뷰**
+
+| 이름 | 코드 (`HomeLayoutMode`) | 레이아웃 | 컴포넌트 | 사진·텍스트 |
+| :--- | :--- | :--- | :--- | :--- |
+| **2열뷰** | `GRID` | 2열 그리드 (`LazyVerticalGrid`) | `AnimalCard` | **1:1** 정사각형 crop, 텍스트는 카드 하단 |
+| **노멀뷰** | `LIST` | 1열 리스트 (`LazyColumn`) | `AnimalListCard` | 좌측 썸네일 **120dp** + 품종·상태·보호소 **각 1행** |
+| **카드뷰** | `COVER` | 1열 리스트 (`LazyColumn`) | `AnimalCoverCard` | **16:9** 전폭 crop, 텍스트는 하단 그라데이션 위 |
+
+**공통**
+- 화면 마진 `16.dp`, 카드 간격 `12.dp`, 모서리 `16.dp`, elevation `2.dp`
+- 큐레이션(오늘 등록·입양 임박), 무한 스크롤, 마음에 두기, 검색·필터 **스크롤 접힘** 동작은 세 보기 모두 동일
+- Coil `ContentScale.Crop`으로 비율 영역을 채움
+
+**와이어프레임 (요약)**
+
+```
+[2열뷰]                    [노멀뷰]                 [카드뷰]
+┌────┐ ┌────┐            ┌─────────────────┐    ┌─────────────────┐
+│ 1:1│ │ 1:1│            │[썸] 품종  [상태]│    │   16:9 사진     │
+│텍스트│ │텍스트│            │     보호소      ♥│    │  (전체 crop)    ♥│
+└────┘ └────┘            └─────────────────┘    │ 품종·보호소(오버)│
+                                                └─────────────────┘
+```
+
+**구현 위치**
+| 항목 | 경로 |
+| :--- | :--- |
+| Enum | `domain/model/HomeLayoutMode.kt` |
+| 저장 | `data/settings/UserPreferencesDataStore.kt` (DataStore Preferences, key: `home_layout_mode`) |
+| UiState | `HomeUiState.layoutMode` (기본값 `GRID` / 2열뷰, 앱 시작 시 DataStore에서 복원) |
+| 전환 | `HomeViewModel.toggleLayoutMode()` → `SetHomeLayoutModeUseCase` |
+| UI | `HomeScreen` — `HomeAnimalGrid` / `HomeAnimalList` / `HomeAnimalCoverList` |
 
 ---
 
@@ -175,6 +211,7 @@ data class HomeUiState(
     val filterSummary: String = "",
     val canLoadMore: Boolean = false,
     val errorMessage: String? = null,
+    val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID, // 2열뷰
 )
 ```
 
@@ -275,7 +312,10 @@ data class HomeUiState(
 | ViewModel | `presentation/home/HomeViewModel.kt` |
 | UiState | `presentation/home/HomeUiState.kt` |
 | UiModel | `presentation/home/model/AbandonedAnimalUiModel.kt` (신규) |
-| Components | `presentation/home/component/AnimalCard.kt` (신규) |
+| Components | `presentation/home/component/AnimalCard.kt` (2열뷰) |
+| | `presentation/home/component/AnimalListCard.kt` (노멀뷰) |
+| | `presentation/home/component/AnimalCoverCard.kt` (카드뷰) |
+| Layout | `domain/model/HomeLayoutMode.kt` · `data/settings/UserPreferencesDataStore.kt` |
 | UseCase | `domain/usecase/GetAbandonedAnimalsUseCase.kt` |
 | Filter | `domain/model/AbandonedAnimalFilter.kt` |
 
@@ -286,12 +326,17 @@ data class HomeUiState(
 | 항목 | 상태 |
 | :--- | :--- |
 | API 연동 (`GetAbandonedAnimalsUseCase`) | ✅ |
-| `HomeViewModel` / `HomeUiState` | ✅ (임시: 건수 + 품종 3개 미리보기) |
-| 카드 그리드 UI | 🔲 |
-| 필터 칩 | 🔲 |
-| 무한 스크롤 | 🔲 |
-| 동물 상세 화면 | 🔲 (Route만 등록) |
-| Coil | 🔲 |
+| `HomeViewModel` / `HomeUiState` | ✅ |
+| **2열뷰** (`AnimalCard`, 2열 그리드) | ✅ |
+| **노멀뷰** (`AnimalListCard`, 1열) | ✅ |
+| **카드뷰** (`AnimalCoverCard`, 1열 16:9) | ✅ |
+| 보기 형태 전환 (Top App Bar) | ✅ |
+| 검색·필터 스크롤 접힘 (`TopAppBarScrollBehavior`) | ✅ |
+| 필터 칩·바텀시트 | ✅ |
+| 무한 스크롤 | ✅ |
+| Pull-to-refresh | ✅ |
+| 동물 상세 화면 | ✅ |
+| Coil | ✅ |
 
 ---
 
@@ -299,7 +344,7 @@ data class HomeUiState(
 
 | # | 질문 | 제안 |
 | :---: | :--- | :--- |
-| 1 | 그리드 2열 vs 1열 리스트? | **2열** — 탐색·비교에 유리, 입양 앱 UX 트렌드 |
+| 1 | 목록 보기 형태 | ✅ **2열뷰 / 노멀뷰 / 카드뷰** 3종 전환 (§3.6) |
 | 2 | 필터 칩 다중 선택 허용? | MVP: 축종 1개 + 상태 0~1개. Phase 2에서 조합 규칙 문서화 |
 | 3 | `processState` 문자열 파싱 | Domain에 `AbandonmentStatus` sealed class 도입 검토 |
 | 4 | 이미지 URL http | cleartext 허용됨. Phase 2에서 https 리다이렉트 확인 |

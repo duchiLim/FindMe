@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -15,8 +19,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Badge
@@ -59,12 +66,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.presentation.R
 import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
 import com.greenbee.findme.presentation.home.component.AnimalCard
+import com.greenbee.findme.presentation.home.component.AnimalCoverCard
+import com.greenbee.findme.presentation.home.component.AnimalListCard
 import com.greenbee.findme.presentation.home.component.HomeAdvancedFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeCollapsingSearchFilterSection
 import com.greenbee.findme.presentation.home.component.HomeCurationSection
 import com.greenbee.findme.presentation.home.component.HomeGridSkeleton
 import com.greenbee.findme.presentation.home.component.HomeRegionFilterBottomSheet
 import com.greenbee.findme.presentation.home.component.HomeUpKindFilterBottomSheet
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.presentation.home.model.HomeSortOrder
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,6 +89,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     var isSortMenuExpanded by remember { mutableStateOf(false) }
@@ -126,15 +137,33 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(gridState, uiState.canLoadMore, uiState.isLoading, uiState.isFilterLoading, uiState.isLoadingMore, uiState.animals.size) {
+    LaunchedEffect(
+        gridState,
+        listState,
+        uiState.layoutMode,
+        uiState.canLoadMore,
+        uiState.isLoading,
+        uiState.isFilterLoading,
+        uiState.isLoadingMore,
+        uiState.animals.size,
+    ) {
         if (uiState.isLoading || uiState.isFilterLoading || uiState.animals.isEmpty() || !uiState.canLoadMore) {
             return@LaunchedEffect
         }
 
         snapshotFlow {
-            val layoutInfo = gridState.layoutInfo
-            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+            when (uiState.layoutMode) {
+                HomeLayoutMode.GRID -> {
+                    val layoutInfo = gridState.layoutInfo
+                    val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+                }
+                HomeLayoutMode.LIST, HomeLayoutMode.COVER -> {
+                    val layoutInfo = listState.layoutInfo
+                    val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    lastVisibleIndex >= layoutInfo.totalItemsCount - LOAD_MORE_THRESHOLD
+                }
+            }
         }.collect { shouldLoadMore ->
             if (shouldLoadMore) {
                 viewModel.loadMore()
@@ -163,6 +192,23 @@ fun HomeScreen(
                             }
                         }
                         if (uiState.animals.isNotEmpty()) {
+                            IconButton(onClick = viewModel::toggleLayoutMode) {
+                                val (icon, contentDescriptionRes) = when (uiState.layoutMode) {
+                                    HomeLayoutMode.GRID -> {
+                                        Icons.AutoMirrored.Rounded.ViewList to R.string.home_layout_switch_to_list
+                                    }
+                                    HomeLayoutMode.LIST -> {
+                                        Icons.Rounded.Photo to R.string.home_layout_switch_to_cover
+                                    }
+                                    HomeLayoutMode.COVER -> {
+                                        Icons.Rounded.GridView to R.string.home_layout_switch_to_grid
+                                    }
+                                }
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = stringResource(contentDescriptionRes),
+                                )
+                            }
                             IconButton(onClick = { isSortMenuExpanded = true }) {
                                 Icon(
                                     imageVector = Icons.Rounded.MoreVert,
@@ -282,6 +328,7 @@ fun HomeScreen(
             HomeContent(
                 uiState = uiState,
                 gridState = gridState,
+                listState = listState,
                 onAnimalClick = onAnimalClick,
                 onFavoriteToggle = viewModel::toggleFavorite,
                 onRetry = viewModel::retry,
@@ -298,6 +345,7 @@ fun HomeScreen(
 private fun HomeContent(
     uiState: HomeUiState,
     gridState: LazyGridState,
+    listState: LazyListState,
     onAnimalClick: (String) -> Unit,
     onFavoriteToggle: (String) -> Unit,
     onRetry: () -> Unit,
@@ -358,69 +406,255 @@ private fun HomeContent(
             }
 
             else -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    state = gridState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 16.dp,
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    if (uiState.searchQuery.isBlank()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            HomeCurationSection(
-                                title = stringResource(R.string.home_curation_today),
-                                animals = uiState.todayRegisteredAnimals,
-                                favoriteDesertionNos = uiState.favoriteDesertionNos,
-                                onAnimalClick = onAnimalClick,
-                                onFavoriteToggle = onFavoriteToggle,
-                                onSeeMoreClick = onNavigateToTodayRegistered,
-                            )
-                        }
-                    }
-
-                    if (uiState.adoptionImminentAnimals.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            HomeCurationSection(
-                                title = stringResource(R.string.home_curation_imminent),
-                                animals = uiState.adoptionImminentAnimals,
-                                favoriteDesertionNos = uiState.favoriteDesertionNos,
-                                onAnimalClick = onAnimalClick,
-                                onFavoriteToggle = onFavoriteToggle,
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        }
-                    }
-
-                    items(
-                        items = uiState.displayAnimals,
-                        key = { it.desertionNo },
-                    ) { animal ->
-                        AnimalCard(
-                            animal = animal,
-                            onClick = { onAnimalClick(animal.desertionNo) },
-                            showFavoriteToggle = true,
-                            isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
-                            onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
+                when (uiState.layoutMode) {
+                    HomeLayoutMode.GRID -> {
+                        HomeAnimalGrid(
+                            uiState = uiState,
+                            gridState = gridState,
+                            onAnimalClick = onAnimalClick,
+                            onFavoriteToggle = onFavoriteToggle,
+                            onNavigateToTodayRegistered = onNavigateToTodayRegistered,
                         )
                     }
-
-                    if (uiState.isLoadingMore) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
+                    HomeLayoutMode.LIST -> {
+                        HomeAnimalList(
+                            uiState = uiState,
+                            listState = listState,
+                            onAnimalClick = onAnimalClick,
+                            onFavoriteToggle = onFavoriteToggle,
+                            onNavigateToTodayRegistered = onNavigateToTodayRegistered,
+                        )
                     }
+                    HomeLayoutMode.COVER -> {
+                        HomeAnimalCoverList(
+                            uiState = uiState,
+                            listState = listState,
+                            onAnimalClick = onAnimalClick,
+                            onFavoriteToggle = onFavoriteToggle,
+                            onNavigateToTodayRegistered = onNavigateToTodayRegistered,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeAnimalGrid(
+    uiState: HomeUiState,
+    gridState: LazyGridState,
+    onAnimalClick: (String) -> Unit,
+    onFavoriteToggle: (String) -> Unit,
+    onNavigateToTodayRegistered: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        state = gridState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp,
+        ),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (uiState.searchQuery.isBlank()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_today),
+                    animals = uiState.todayRegisteredAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    onSeeMoreClick = onNavigateToTodayRegistered,
+                )
+            }
+        }
+
+        if (uiState.adoptionImminentAnimals.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_imminent),
+                    animals = uiState.adoptionImminentAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        items(
+            items = uiState.displayAnimals,
+            key = { it.desertionNo },
+        ) { animal ->
+            AnimalCard(
+                animal = animal,
+                onClick = { onAnimalClick(animal.desertionNo) },
+                showFavoriteToggle = true,
+                isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
+            )
+        }
+
+        if (uiState.isLoadingMore) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeAnimalCoverList(
+    uiState: HomeUiState,
+    listState: LazyListState,
+    onAnimalClick: (String) -> Unit,
+    onFavoriteToggle: (String) -> Unit,
+    onNavigateToTodayRegistered: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp,
+        ),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (uiState.searchQuery.isBlank()) {
+            item(key = "curation_today") {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_today),
+                    animals = uiState.todayRegisteredAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    onSeeMoreClick = onNavigateToTodayRegistered,
+                )
+            }
+        }
+
+        if (uiState.adoptionImminentAnimals.isNotEmpty()) {
+            item(key = "curation_imminent") {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_imminent),
+                    animals = uiState.adoptionImminentAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        items(
+            items = uiState.displayAnimals,
+            key = { it.desertionNo },
+        ) { animal ->
+            AnimalCoverCard(
+                animal = animal,
+                onClick = { onAnimalClick(animal.desertionNo) },
+                showFavoriteToggle = true,
+                isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
+            )
+        }
+
+        if (uiState.isLoadingMore) {
+            item(key = "loading_more") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeAnimalList(
+    uiState: HomeUiState,
+    listState: LazyListState,
+    onAnimalClick: (String) -> Unit,
+    onFavoriteToggle: (String) -> Unit,
+    onNavigateToTodayRegistered: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp,
+        ),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (uiState.searchQuery.isBlank()) {
+            item(key = "curation_today") {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_today),
+                    animals = uiState.todayRegisteredAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    onSeeMoreClick = onNavigateToTodayRegistered,
+                )
+            }
+        }
+
+        if (uiState.adoptionImminentAnimals.isNotEmpty()) {
+            item(key = "curation_imminent") {
+                HomeCurationSection(
+                    title = stringResource(R.string.home_curation_imminent),
+                    animals = uiState.adoptionImminentAnimals,
+                    favoriteDesertionNos = uiState.favoriteDesertionNos,
+                    onAnimalClick = onAnimalClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        items(
+            items = uiState.displayAnimals,
+            key = { it.desertionNo },
+        ) { animal ->
+            AnimalListCard(
+                animal = animal,
+                onClick = { onAnimalClick(animal.desertionNo) },
+                showFavoriteToggle = true,
+                isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
+            )
+        }
+
+        if (uiState.isLoadingMore) {
+            item(key = "loading_more") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }

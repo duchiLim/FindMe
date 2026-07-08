@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.model.AbandonedAnimalFilter
 import com.greenbee.findme.domain.model.AbandonmentState
+import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.domain.model.Region
 import com.greenbee.findme.domain.model.UpKind
 import com.greenbee.findme.domain.model.FavoriteAnimal
@@ -14,8 +15,10 @@ import com.greenbee.findme.domain.usecase.GetSidoListUseCase
 import com.greenbee.findme.domain.usecase.GetSigunguListUseCase
 import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
+import com.greenbee.findme.domain.usecase.ObserveHomeLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.SaveHomeListCacheUseCase
+import com.greenbee.findme.domain.usecase.SetHomeLayoutModeUseCase
 import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
 import com.greenbee.findme.presentation.home.model.HomeDateRange
 import com.greenbee.findme.presentation.home.model.HomeSortOrder
@@ -37,6 +40,8 @@ class HomeViewModel @Inject constructor(
     private val getSigunguListUseCase: GetSigunguListUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
     getUserSettingsUseCase: GetUserSettingsUseCase,
+    observeHomeLayoutModeUseCase: ObserveHomeLayoutModeUseCase,
+    private val setHomeLayoutModeUseCase: SetHomeLayoutModeUseCase,
     private val getHomeListCacheUseCase: GetHomeListCacheUseCase,
     private val saveHomeListCacheUseCase: SaveHomeListCacheUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -71,6 +76,11 @@ class HomeViewModel @Inject constructor(
             }
         }
         loadAnimals(reset = true)
+        viewModelScope.launch {
+            observeHomeLayoutModeUseCase().collect { layoutMode ->
+                _uiState.update { it.copy(layoutMode = layoutMode) }
+            }
+        }
         viewModelScope.launch {
             observeFavoritesUseCase().collect { favorites ->
                 rawFavorites = favorites
@@ -126,6 +136,17 @@ class HomeViewModel @Inject constructor(
 
     fun setSortOrder(sortOrder: HomeSortOrder) {
         _uiState.update { it.copy(sortOrder = sortOrder) }
+    }
+
+    fun toggleLayoutMode() {
+        val nextMode = when (_uiState.value.layoutMode) {
+            HomeLayoutMode.GRID -> HomeLayoutMode.LIST
+            HomeLayoutMode.LIST -> HomeLayoutMode.COVER
+            HomeLayoutMode.COVER -> HomeLayoutMode.GRID
+        }
+        viewModelScope.launch {
+            setHomeLayoutModeUseCase(nextMode)
+        }
     }
 
     fun onStateSelected(state: AbandonmentState) {

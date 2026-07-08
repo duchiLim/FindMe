@@ -223,7 +223,7 @@ data class HomeUiState(
 | :--- | :--- | :--- |
 | 홈 카드 탭 | `navController.navigate(FindMeRoute.animalDetail(desertionNo))` | 동물 상세 |
 | (Phase 2) 마음에 두기 버튼 | Room 저장 + 스낵바 | 마음에 두기 탭 이동 유도 |
-| (Phase 2) 보호소명 탭 | 보호소 탭 + (선택) 필터 | 보호소 |
+| (Phase 2) 보호소명 탭 | 보호소 탭 + (선택) 지역·매칭 | 보호소 · [SHELTER.md](./SHELTER.md) |
 
 - 홈은 **top-level route** → Bottom Bar 유지
 - 상세 진입 시 Bottom Bar 숨김 ([PLANNING.md](./PLANNING.md) §6.3)

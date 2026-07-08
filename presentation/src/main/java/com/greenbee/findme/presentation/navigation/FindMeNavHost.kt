@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.greenbee.findme.presentation.common.PlaceholderScreen
 import com.greenbee.findme.presentation.detail.AnimalDetailScreen
 import com.greenbee.findme.presentation.home.HomeScreen
+import com.greenbee.findme.presentation.shelter.ShelterScreen
 
 @Composable
 fun FindMeNavHost(
@@ -35,7 +36,7 @@ fun FindMeNavHost(
             PlaceholderScreen(title = stringResource(R.string.favorite_screen_title))
         }
         composable(FindMeRoute.SHELTER) {
-            PlaceholderScreen(title = "보호소")
+            ShelterScreen()
         }
         composable(FindMeRoute.MY) {
             PlaceholderScreen(title = "마이")

@@ -78,10 +78,12 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 - 필터: 지역(시도/시군구), 축종, 상태, 기간
 - 카드 탭 → 동물 상세 화면 이동
 
-#### 보호소 (`shelter`) — Phase 2
-- 시도/시군구 선택 → 보호소 목록
-- 보호소명, 주소, 전화번호
-- (추후) 지도 연동, 길찾기
+#### 보호소 (`shelter`) — MVP
+- 상세 기획: [SHELTER.md](./SHELTER.md)
+- 시·도/시·군·구 선택 → 보호소 목록 (`shelter_v2`)
+- 보호소명, 소속 기관, 주소, 전화번호
+- 전화 CTA (`ACTION_DIAL`)
+- (Phase 2) 보호소 상세, 홈 연동, 지도·길찾기
 
 #### 마음에 두기 (`favorite`) — Phase 2
 - Room에 저장한 관심 동물 목록
@@ -100,6 +102,7 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 | 화면 | Route | 진입 경로 |
 | :--- | :--- | :--- |
 | 동물 상세 | `animal/{desertionNo}` | 홈·마음에 둔 목록에서 카드 선택 · 상세 기획: [DETAIL.md](./DETAIL.md) |
+| 보호소 상세 | `shelter/{careRegNo}` | (Phase 2) 보호소 탭 카드 · 기획: [SHELTER.md](./SHELTER.md) §3.5 |
 
 탭 전환 시 **상태 유지** (`saveState` / `restoreState`)로 각 탭의 스크롤·필터를 보존합니다.
 
@@ -115,7 +118,7 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 | 탭 | 구현 상태 |
 | :--- | :--- |
 | 홈 | ✅ `HomeScreen` (API 연동) |
-| 보호소 | 🔲 Placeholder |
+| 보호소 | ✅ `ShelterScreen` (API 연동) · 기획: [SHELTER.md](./SHELTER.md) |
 | 마음에 두기 | 🔲 Placeholder |
 | 마이 | 🔲 Placeholder |
 | 동물 상세 | 🔲 Route만 등록 |

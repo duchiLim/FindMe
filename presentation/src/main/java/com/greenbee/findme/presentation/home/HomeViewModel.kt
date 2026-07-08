@@ -211,12 +211,12 @@ class HomeViewModel @Inject constructor(
 
     private fun loadAnimals(reset: Boolean, fromPullRefresh: Boolean = false) {
         if (isRequestInFlight) return
+        isRequestInFlight = true
 
         val page = if (reset) 1 else currentPage + 1
         val currentState = _uiState.value
 
         viewModelScope.launch {
-            isRequestInFlight = true
             _uiState.update {
                 it.copy(
                     isLoading = reset && !fromPullRefresh && it.animals.isEmpty(),
@@ -233,7 +233,8 @@ class HomeViewModel @Inject constructor(
             }.onSuccess { result ->
                 currentPage = page
                 val newAnimals = result.items.map { it.toUiModel() }
-                val mergedAnimals = if (reset) newAnimals else currentState.animals + newAnimals
+                val mergedAnimals = (if (reset) newAnimals else currentState.animals + newAnimals)
+                    .distinctBy { it.desertionNo }
                 val canLoadMore = mergedAnimals.size < result.totalCount
 
                 _uiState.update {

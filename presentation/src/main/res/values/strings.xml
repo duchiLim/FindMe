@@ -52,4 +52,15 @@
     <string name="detail_label_shelter_tel">전화번호</string>
     <string name="detail_no_special_mark">등록된 특징이 없습니다.</string>
     <string name="detail_desertion_no">유기번호 %1$s</string>
+    <string name="shelter_screen_title">보호소</string>
+    <string name="shelter_region_sheet_title">지역 선택</string>
+    <string name="shelter_region_sheet_hint">시·도와 시·군·구를 모두 선택해야 보호소 목록을 조회할 수 있습니다.</string>
+    <string name="shelter_select_sido">시·도 선택</string>
+    <string name="shelter_select_sigungu">시·군·구 선택</string>
+    <string name="shelter_select_region">지역 선택하기</string>
+    <string name="shelter_empty_region">지역을 선택해 주세요</string>
+    <string name="shelter_empty_region_description">시·도와 시·군·구를 고르면 해당 지역 보호소를 찾을 수 있어요.</string>
+    <string name="shelter_empty_result">선택한 지역에 등록된 보호소가 없습니다.</string>
+    <string name="shelter_total_count">보호소 %1$d곳</string>
+    <string name="shelter_call">전화</string>
 </resources>

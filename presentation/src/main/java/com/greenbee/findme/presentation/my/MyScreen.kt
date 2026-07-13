@@ -17,10 +17,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.rounded.Assignment
+// import androidx.compose.material.icons.automirrored.rounded.Assignment // 추후 입양·임보 신청 내역 지원 시 복구
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.RateReview
+import androidx.compose.material.icons.rounded.StarRate
+// import androidx.compose.material.icons.rounded.Notifications // 추후 알림 설정 지원 시 복구
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,7 +56,7 @@ fun MyScreen(
     onAnimalClick: (String) -> Unit,
     onNavigateToRecent: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    onNavigateToApplications: () -> Unit,
+    // onNavigateToApplications: () -> Unit, // 추후 입양·임보 신청 내역 지원
     onNavigateToFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MyViewModel = hiltViewModel(),
@@ -159,6 +161,145 @@ fun MyScreen(
 
             item {
                 ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_recent_viewing_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_recent_viewing_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Visibility,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = uiState.isRecentViewingEnabled,
+                            onCheckedChange = viewModel::onRecentViewingEnabledChange,
+                        )
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_favorite_shortcut_title)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = onNavigateToFavorite),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                // TODO: 추후 입양·임보 신청 내역 지원
+                /*
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_applications_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_applications_menu_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.Assignment,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable(onClick = onNavigateToApplications),
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                */
+
+                // TODO: 추후 알림 설정 지원
+                /*
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_notification_settings_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_notification_settings_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Notifications,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = uiState.isNotificationEnabled,
+                            onCheckedChange = viewModel::onNotificationEnabledChange,
+                        )
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                */
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_feedback_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_feedback_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.RateReview,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        context.launchDeveloperFeedback(
+                            recipientEmail = context.getString(R.string.my_feedback_email),
+                            subject = context.getString(R.string.my_feedback_subject),
+                            body = context.getString(
+                                R.string.my_feedback_body_template,
+                                uiState.appVersionName,
+                                uiState.appVersionCode,
+                            ),
+                        )
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.my_app_review_title)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.my_app_review_summary))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.StarRate,
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        context.openPlayStoreListing()
+                    },
+                )
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                ListItem(
                     headlineContent = { Text(stringResource(R.string.my_app_info_title)) },
                     leadingContent = {
                         Icon(
@@ -196,85 +337,6 @@ fun MyScreen(
                     modifier = Modifier.clickable {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DATA_GO_KR_URL))
                         context.startActivity(intent)
-                    },
-                )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.my_applications_title)) },
-                    supportingContent = {
-                        Text(stringResource(R.string.my_applications_menu_summary))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.Assignment,
-                            contentDescription = null,
-                        )
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                        )
-                    },
-                    modifier = Modifier.clickable(onClick = onNavigateToApplications),
-                )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.my_favorite_shortcut_title)) },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Favorite,
-                            contentDescription = null,
-                        )
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                        )
-                    },
-                    modifier = Modifier.clickable(onClick = onNavigateToFavorite),
-                )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.my_notification_settings_title)) },
-                    supportingContent = {
-                        Text(stringResource(R.string.my_notification_settings_summary))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Notifications,
-                            contentDescription = null,
-                        )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = uiState.isNotificationEnabled,
-                            onCheckedChange = viewModel::onNotificationEnabledChange,
-                        )
-                    },
-                )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.my_recent_viewing_title)) },
-                    supportingContent = {
-                        Text(stringResource(R.string.my_recent_viewing_summary))
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Visibility,
-                            contentDescription = null,
-                        )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = uiState.isRecentViewingEnabled,
-                            onCheckedChange = viewModel::onRecentViewingEnabledChange,
-                        )
                     },
                 )
             }

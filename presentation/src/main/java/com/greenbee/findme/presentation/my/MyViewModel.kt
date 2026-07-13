@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.usecase.GetUserSettingsUseCase
 import com.greenbee.findme.domain.usecase.ObserveRecentlyViewedUseCase
-import com.greenbee.findme.domain.usecase.SetNotificationEnabledUseCase
+// import com.greenbee.findme.domain.usecase.SetNotificationEnabledUseCase // 추후 알림 설정 지원
 import com.greenbee.findme.domain.usecase.SetRecentViewingEnabledUseCase
 import com.greenbee.findme.presentation.my.model.toRecentUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +22,7 @@ class MyViewModel @Inject constructor(
     @ApplicationContext context: Context,
     observeRecentlyViewedUseCase: ObserveRecentlyViewedUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
-    private val setNotificationEnabledUseCase: SetNotificationEnabledUseCase,
+    // private val setNotificationEnabledUseCase: SetNotificationEnabledUseCase, // 추후 알림 설정 지원
     private val setRecentViewingEnabledUseCase: SetRecentViewingEnabledUseCase,
 ) : ViewModel() {
 
@@ -42,7 +42,7 @@ class MyViewModel @Inject constructor(
             it.copy(
                 appVersionName = versionName,
                 appVersionCode = versionCode,
-                isNotificationEnabled = settings.isNotificationEnabled,
+                // isNotificationEnabled = settings.isNotificationEnabled, // 추후 알림 설정 지원
                 isRecentViewingEnabled = settings.isRecentViewingEnabled,
             )
         }
@@ -59,10 +59,13 @@ class MyViewModel @Inject constructor(
         }
     }
 
+    // TODO: 추후 알림 설정 지원
+    /*
     fun onNotificationEnabledChange(enabled: Boolean) {
         setNotificationEnabledUseCase(enabled)
         _uiState.update { it.copy(isNotificationEnabled = enabled) }
     }
+    */
 
     fun onRecentViewingEnabledChange(enabled: Boolean) {
         viewModelScope.launch {

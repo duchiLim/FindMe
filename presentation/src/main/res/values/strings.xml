@@ -8,7 +8,7 @@
     <string name="favorite_added_message">마음에 둔 목록에 추가했습니다</string>
     <string name="favorite_removed_message">마음에 둔 목록에서 뺐습니다</string>
     <string name="favorite_empty_title">아직 마음에 둔 동물이 없어요</string>
-    <string name="favorite_empty_description">홈에서 마음에 드는 아이를 저장해 보세요.</string>
+    <string name="favorite_empty_description">홈에서 마음에 드는 동물을 저장해 보세요.</string>
     <string name="favorite_browse_animals">유기동물 보러 가기</string>
     <string name="favorite_total_count">마음에 둔 동물 %1$d마리 · 최근 추가순</string>
     <string name="favorite_total_count_status_sort">마음에 둔 동물 %1$d마리 · 공고 상태순</string>
@@ -152,6 +152,15 @@
     <string name="my_app_info_description">유기동물 입양·임시보호를 돕는 앱입니다.</string>
     <string name="my_data_source_title">데이터 출처</string>
     <string name="my_data_source_summary">농림축산식품부 공공데이터포털</string>
+    <string name="my_feedback_title">의견 보내기</string>
+    <string name="my_feedback_summary">기능 제안·불편 사항을 보내 주세요</string>
+    <string name="my_feedback_email" translatable="false"></string>
+    <string name="my_feedback_subject">FindMe 의견 보내기</string>
+    <string name="my_feedback_body_template">안녕하세요, FindMe 앱에 대한 의견을 보냅니다.\n\n\n---\n앱 버전: %1$s (%2$d)\n</string>
+    <string name="my_feedback_no_email_app">메일 앱을 찾을 수 없습니다.</string>
+    <string name="my_app_review_title">앱 평가하기</string>
+    <string name="my_app_review_summary">Play Store에서 FindMe를 평가해 주세요</string>
+    <string name="my_app_review_unavailable">Play Store를 열 수 없습니다.</string>
     <string name="my_applications_title">입양·임보 신청 내역</string>
     <string name="my_applications_menu_summary">준비 중</string>
     <string name="my_applications_empty_title">아직 신청 내역이 없어요</string>

@@ -13,7 +13,7 @@ import com.greenbee.findme.presentation.favorite.FavoriteScreen
 import com.greenbee.findme.presentation.home.HomeScreen
 import com.greenbee.findme.presentation.home.today.HomeTodayRegisteredScreen
 import com.greenbee.findme.presentation.my.MyAboutScreen
-import com.greenbee.findme.presentation.my.MyApplicationsScreen
+// import com.greenbee.findme.presentation.my.MyApplicationsScreen // 추후 입양·임보 신청 내역 지원
 import com.greenbee.findme.presentation.my.MyRecentScreen
 import com.greenbee.findme.presentation.my.MyScreen
 import com.greenbee.findme.presentation.shelter.ShelterDetailScreen
@@ -143,9 +143,9 @@ fun FindMeNavHost(
                 onNavigateToAbout = {
                     navController.navigate(FindMeRoute.MY_ABOUT)
                 },
-                onNavigateToApplications = {
-                    navController.navigate(FindMeRoute.MY_APPLICATIONS)
-                },
+                // onNavigateToApplications = { // 추후 입양·임보 신청 내역 지원
+                //     navController.navigate(FindMeRoute.MY_APPLICATIONS)
+                // },
                 onNavigateToFavorite = {
                     navController.navigate(FindMeRoute.FAVORITE) {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -170,6 +170,8 @@ fun FindMeNavHost(
                 },
             )
         }
+        // TODO: 추후 입양·임보 신청 내역 지원
+        /*
         composable(FindMeRoute.MY_APPLICATIONS) {
             MyApplicationsScreen(
                 onBackClick = { navController.popBackStack() },
@@ -193,6 +195,7 @@ fun FindMeNavHost(
                 },
             )
         }
+        */
         composable(
             route = FindMeRoute.ANIMAL_DETAIL,
             arguments = listOf(

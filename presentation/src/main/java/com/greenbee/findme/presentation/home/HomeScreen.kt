@@ -57,7 +57,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -91,7 +91,7 @@ fun HomeScreen(
     val gridState = rememberLazyGridState()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val resources = LocalResources.current
     var isSortMenuExpanded by remember { mutableStateOf(false) }
     var searchFilterHeightPx by remember { mutableFloatStateOf(0f) }
     val isScrollHideEnabled = !uiState.isLoading &&
@@ -114,8 +114,8 @@ fun HomeScreen(
         when (uiState.favoriteSnackbar) {
             HomeFavoriteSnackbar.ADDED -> {
                 val result = snackbarHostState.showSnackbarWithAutoDismiss(
-                    message = context.getString(R.string.favorite_added_message),
-                    actionLabel = context.getString(R.string.favorite_view_list),
+                    message = resources.getString(R.string.favorite_added_message),
+                    actionLabel = resources.getString(R.string.favorite_view_list),
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     onNavigateToFavorite()
@@ -124,8 +124,8 @@ fun HomeScreen(
             }
             HomeFavoriteSnackbar.REMOVED -> {
                 val result = snackbarHostState.showSnackbarWithAutoDismiss(
-                    message = context.getString(R.string.favorite_removed_message),
-                    actionLabel = context.getString(R.string.favorite_undo),
+                    message = resources.getString(R.string.favorite_removed_message),
+                    actionLabel = resources.getString(R.string.favorite_undo),
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     viewModel.undoRemoveFavorite()
@@ -380,7 +380,7 @@ private fun HomeContent(
 
             uiState.errorMessage != null && uiState.animals.isEmpty() -> {
                 HomeMessageContent(
-                    message = uiState.errorMessage.orEmpty(),
+                    message = uiState.errorMessage,
                     actionLabel = stringResource(R.string.home_retry),
                     onAction = onRetry,
                     modifier = Modifier.fillMaxSize(),

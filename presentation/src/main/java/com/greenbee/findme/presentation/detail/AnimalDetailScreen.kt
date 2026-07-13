@@ -1,7 +1,6 @@
 package com.greenbee.findme.presentation.detail
 
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,9 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,6 +50,7 @@ import com.greenbee.findme.presentation.detail.component.DetailSectionCard
 import com.greenbee.findme.presentation.detail.model.AnimalDetailUiModel
 import com.greenbee.findme.presentation.home.component.AnimalKindTitleRow
 import com.greenbee.findme.presentation.ui.theme.FindMePrimaryVariant
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,18 +62,19 @@ fun AnimalDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.favoriteMessage) {
         when (uiState.favoriteMessage) {
             FavoriteMessage.ADDED -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.favorite_added_message))
+                snackbarHostState.showSnackbar(resources.getString(R.string.favorite_added_message))
                 viewModel.onFavoriteMessageShown()
             }
             FavoriteMessage.REMOVED -> {
                 val result = snackbarHostState.showSnackbarWithAutoDismiss(
-                    message = context.getString(R.string.favorite_removed_message),
-                    actionLabel = context.getString(R.string.favorite_undo),
+                    message = resources.getString(R.string.favorite_removed_message),
+                    actionLabel = resources.getString(R.string.favorite_undo),
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
@@ -95,7 +96,7 @@ fun AnimalDetailScreen(
         if (uiState.showShelterNotFound) {
             Toast.makeText(
                 context,
-                context.getString(R.string.shelter_lookup_not_found),
+                resources.getString(R.string.shelter_lookup_not_found),
                 Toast.LENGTH_SHORT,
             ).show()
             viewModel.onShelterNotFoundShown()
@@ -160,11 +161,12 @@ fun AnimalDetailScreen(
                         if (animal.shelterTel.isBlank()) {
                             Toast.makeText(
                                 context,
-                                context.getString(R.string.detail_no_phone),
+                                resources.getString(R.string.detail_no_phone),
                                 Toast.LENGTH_SHORT,
                             ).show()
                         } else {
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${animal.shelterTel}"))
+                            val intent = Intent(Intent.ACTION_DIAL,
+                                "tel:${animal.shelterTel}".toUri())
                             context.startActivity(intent)
                         }
                     },

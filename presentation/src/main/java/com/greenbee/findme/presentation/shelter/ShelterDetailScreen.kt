@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,6 +55,7 @@ import com.greenbee.findme.presentation.shelter.model.ShelterUiModel
 import com.greenbee.findme.presentation.shelter.util.openDirections
 import com.greenbee.findme.presentation.shelter.util.openMap
 import com.greenbee.findme.presentation.ui.theme.FindMePrimaryVariant
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +67,7 @@ fun ShelterDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
     val shelter = uiState.shelter
     val mapLocation = uiState.mapLocation ?: shelter?.mapLocation
@@ -73,11 +75,11 @@ fun ShelterDetailScreen(
     LaunchedEffect(uiState.favoriteMessage) {
         when (uiState.favoriteMessage) {
             ShelterFavoriteMessage.ADDED -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.shelter_favorite_added))
+                snackbarHostState.showSnackbar(resources.getString(R.string.shelter_favorite_added))
                 viewModel.onFavoriteMessageShown()
             }
             ShelterFavoriteMessage.REMOVED -> {
-                snackbarHostState.showSnackbar(context.getString(R.string.shelter_favorite_removed))
+                snackbarHostState.showSnackbar(resources.getString(R.string.shelter_favorite_removed))
                 viewModel.onFavoriteMessageShown()
             }
             null -> Unit
@@ -139,11 +141,11 @@ fun ShelterDetailScreen(
                         if (shelter.tel.isBlank()) {
                             Toast.makeText(
                                 context,
-                                context.getString(R.string.detail_no_phone),
+                                resources.getString(R.string.detail_no_phone),
                                 Toast.LENGTH_SHORT,
                             ).show()
                         } else {
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${shelter.tel}"))
+                            val intent = Intent(Intent.ACTION_DIAL, "tel:${shelter.tel}".toUri())
                             context.startActivity(intent)
                         }
                     },

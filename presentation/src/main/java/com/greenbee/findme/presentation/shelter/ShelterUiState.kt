@@ -44,14 +44,18 @@ data class ShelterUiState(
         get() = when {
             selectedSido != null && selectedSigungu != null ->
                 "${selectedSido.name} · ${selectedSigungu.name}"
-            selectedSido != null -> selectedSido.name
+            selectedSido != null ->
+                "${selectedSido.name} · 시군구 전체"
             else -> ""
         }
 
     val displayShelters: List<ShelterUiModel>
         get() {
             val base = when (listMode) {
-                ShelterListMode.ALL -> shelters
+                ShelterListMode.ALL -> shelters.map { shelter ->
+                    val isFavorite = favoriteCareRegNos.contains(shelter.careRegNo)
+                    if (shelter.isFavorite == isFavorite) shelter else shelter.copy(isFavorite = isFavorite)
+                }
                 ShelterListMode.FAVORITES -> favoriteShelters
             }
             val query = searchQuery.trim()

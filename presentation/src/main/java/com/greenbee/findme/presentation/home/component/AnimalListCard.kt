@@ -63,6 +63,7 @@ fun AnimalListCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 4.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -72,7 +73,7 @@ fun AnimalListCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
-                .padding(top = 6.dp, end = 12.dp, bottom = 6.dp),
+                .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.Top,
         ) {

@@ -37,6 +37,7 @@ internal fun ShelterAnimalsContent(
     gridState: LazyGridState,
     listState: LazyListState,
     onAnimalClick: (String) -> Unit,
+    onFavoriteToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -69,6 +70,9 @@ internal fun ShelterAnimalsContent(
                         AnimalCard(
                             animal = animal,
                             onClick = { onAnimalClick(animal.desertionNo) },
+                            showFavoriteToggle = true,
+                            isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                            onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
                         )
                     }
 
@@ -101,6 +105,9 @@ internal fun ShelterAnimalsContent(
                         AnimalListCard(
                             animal = animal,
                             onClick = { onAnimalClick(animal.desertionNo) },
+                            showFavoriteToggle = true,
+                            isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                            onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
                         )
                     }
 
@@ -134,6 +141,9 @@ internal fun ShelterAnimalsContent(
                         AnimalCoverCard(
                             animal = animal,
                             onClick = { onAnimalClick(animal.desertionNo) },
+                            showFavoriteToggle = true,
+                            isFavorite = animal.desertionNo in uiState.favoriteDesertionNos,
+                            onFavoriteToggleClick = { onFavoriteToggle(animal.desertionNo) },
                         )
                     }
 

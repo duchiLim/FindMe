@@ -39,7 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,7 +61,7 @@ fun FavoriteScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var isSortMenuExpanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    val resources = LocalResources.current
     val gridState = rememberLazyGridState()
     val listState = rememberLazyListState()
 
@@ -75,8 +75,8 @@ fun FavoriteScreen(
         if (!uiState.showRemovedSnackbar) return@LaunchedEffect
 
         val result = snackbarHostState.showSnackbarWithAutoDismiss(
-            message = context.getString(R.string.favorite_removed_message),
-            actionLabel = context.getString(R.string.favorite_undo),
+            message = resources.getString(R.string.favorite_removed_message),
+            actionLabel = resources.getString(R.string.favorite_undo),
         )
         when (result) {
             SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()

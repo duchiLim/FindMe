@@ -22,15 +22,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenbee.findme.domain.model.HomeLayoutMode
 import com.greenbee.findme.presentation.R
+import com.greenbee.findme.presentation.common.showSnackbarWithAutoDismiss
+import com.greenbee.findme.presentation.home.HomeFavoriteSnackbar
 import com.greenbee.findme.presentation.shelter.animals.component.ShelterAnimalsContent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,12 +53,41 @@ import com.greenbee.findme.presentation.shelter.animals.component.ShelterAnimals
 fun ShelterAnimalsScreen(
     onBackClick: () -> Unit,
     onAnimalClick: (String) -> Unit,
+    onNavigateToFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ShelterAnimalsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
+
+    LaunchedEffect(uiState.favoriteSnackbar) {
+        when (uiState.favoriteSnackbar) {
+            HomeFavoriteSnackbar.ADDED -> {
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
+                    message = resources.getString(R.string.favorite_added_message),
+                    actionLabel = resources.getString(R.string.favorite_view_list),
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    onNavigateToFavorite()
+                }
+                viewModel.onFavoriteSnackbarShown()
+            }
+            HomeFavoriteSnackbar.REMOVED -> {
+                val result = snackbarHostState.showSnackbarWithAutoDismiss(
+                    message = resources.getString(R.string.favorite_removed_message),
+                    actionLabel = resources.getString(R.string.favorite_undo),
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()
+                    SnackbarResult.Dismissed -> viewModel.onFavoriteSnackbarShown()
+                }
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(
         gridState,
@@ -89,6 +125,7 @@ fun ShelterAnimalsScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),
@@ -184,6 +221,7 @@ fun ShelterAnimalsScreen(
                         gridState = gridState,
                         listState = listState,
                         onAnimalClick = onAnimalClick,
+                        onFavoriteToggle = viewModel::toggleFavorite,
                     )
                 }
             }

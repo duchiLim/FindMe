@@ -94,12 +94,11 @@ class ShelterViewModel @Inject constructor(
 
     fun onApplyRegionFilter() {
         val draftSido = _uiState.value.draftSido ?: return
-        val draftSigungu = _uiState.value.draftSigungu ?: return
 
         _uiState.update {
             it.copy(
                 selectedSido = draftSido,
-                selectedSigungu = draftSigungu,
+                selectedSigungu = _uiState.value.draftSigungu,
                 isRegionFilterSheetVisible = false,
                 hasAppliedRegion = true,
             )
@@ -337,7 +336,6 @@ class ShelterViewModel @Inject constructor(
     ) {
         val state = _uiState.value
         val sidoCode = state.selectedSido?.code ?: return
-        val sigunguCode = state.selectedSigungu?.code ?: return
 
         viewModelScope.launch {
             _uiState.update {
@@ -350,13 +348,14 @@ class ShelterViewModel @Inject constructor(
             }
 
             runCatching {
-                getShelterListUseCase(
+                fetchSheltersForRegion(
                     sidoCode = sidoCode,
-                    sigunguCode = sigunguCode,
+                    sigunguCode = state.selectedSigungu?.code,
+                    sigunguList = state.sigunguList,
                 )
-            }.onSuccess { result ->
+            }.onSuccess { shelters ->
                 val favoriteCareRegNos = _uiState.value.favoriteCareRegNos
-                val shelters = result.items
+                val shelterUiModels = shelters
                     .map { shelter ->
                         shelter.toUiModel(
                             isFavorite = favoriteCareRegNos.contains(shelter.careRegNo),
@@ -367,9 +366,9 @@ class ShelterViewModel @Inject constructor(
                     it.copy(
                         isShelterListLoading = false,
                         isRefreshing = false,
-                        shelters = shelters,
-                        totalCount = result.totalCount,
-                        isEmpty = shelters.isEmpty(),
+                        shelters = shelterUiModels,
+                        totalCount = shelterUiModels.size,
+                        isEmpty = shelterUiModels.isEmpty(),
                         errorMessage = null,
                         userLocation = userLocation ?: it.userLocation,
                     )
@@ -390,5 +389,32 @@ class ShelterViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun fetchSheltersForRegion(
+        sidoCode: String,
+        sigunguCode: String?,
+        sigunguList: List<Region>,
+    ): List<Shelter> {
+        if (sigunguCode != null) {
+            return getShelterListUseCase(
+                sidoCode = sidoCode,
+                sigunguCode = sigunguCode,
+            ).items
+        }
+
+        val sigunguCodes = sigunguList.map { it.code }.ifEmpty {
+            getSigunguListUseCase(sidoCode).items.map { it.code }
+        }
+        if (sigunguCodes.isEmpty()) return emptyList()
+
+        return sigunguCodes.flatMap { code ->
+            runCatching {
+                getShelterListUseCase(
+                    sidoCode = sidoCode,
+                    sigunguCode = code,
+                ).items
+            }.getOrElse { emptyList() }
+        }.distinctBy { it.careRegNo }
     }
 }

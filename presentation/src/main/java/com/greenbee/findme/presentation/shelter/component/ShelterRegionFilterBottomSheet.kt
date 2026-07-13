@@ -49,7 +49,7 @@ fun ShelterRegionFilterBottomSheet(
     if (!visible) return
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val canApply = draftSido != null && draftSigungu != null
+    val canApply = draftSido != null
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -88,7 +88,7 @@ fun ShelterRegionFilterBottomSheet(
                 label = stringResource(R.string.home_filter_sigungu),
                 selectedLabel = when {
                     draftSido == null -> stringResource(R.string.home_filter_select_sido_first)
-                    draftSigungu == null -> stringResource(R.string.shelter_select_sigungu)
+                    draftSigungu == null -> stringResource(R.string.home_filter_sigungu_all)
                     else -> draftSigungu.name
                 },
                 enabled = draftSido != null && !isSigunguListLoading,
@@ -96,7 +96,10 @@ fun ShelterRegionFilterBottomSheet(
                 options = if (draftSido == null) {
                     emptyList()
                 } else {
-                    sigunguList.map { it.name to it }
+                    buildList {
+                        add(stringResource(R.string.home_filter_sigungu_all) to null)
+                        addAll(sigunguList.map { it.name to it })
+                    }
                 },
                 onOptionSelected = onDraftSigunguSelected,
             )
@@ -128,7 +131,7 @@ fun ShelterRegionFilterBottomSheet(
 private fun RegionDropdownField(
     label: String,
     selectedLabel: String,
-    options: List<Pair<String, Region>>,
+    options: List<Pair<String, Region?>>,
     onOptionSelected: (Region?) -> Unit,
     enabled: Boolean = true,
     isLoading: Boolean = false,

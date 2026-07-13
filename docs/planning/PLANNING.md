@@ -118,6 +118,10 @@ FindMe는 **4탭 Bottom Navigation**을 기본으로 합니다. 입양·임시�
 | Bottom Bar | `presentation/.../navigation/FindMeBottomBar.kt` |
 | 앱 진입 | `presentation/.../navigation/FindMeApp.kt` |
 
+### 6.4 수익화 (광고)
+- 상세 기획: [ADS.md](./ADS.md)
+- Phase 1: 마이 탭 배너 파일럿 → Phase 2: 홈·보호소 네이티브 (상세·전화 구간 무광고)
+
 | 탭 | 구현 상태 |
 | :--- | :--- |
 | 홈 | ✅ `HomeScreen` (API 연동) |

@@ -4,10 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenbee.findme.domain.model.AbandonedAnimalFilter
+import com.greenbee.findme.domain.model.FavoriteAnimal
 import com.greenbee.findme.domain.model.HomeLayoutMode
+import com.greenbee.findme.domain.usecase.FavoriteToggleResult
 import com.greenbee.findme.domain.usecase.GetAbandonedAnimalsUseCase
+import com.greenbee.findme.domain.usecase.ObserveFavoritesUseCase
 import com.greenbee.findme.domain.usecase.ObserveShelterLayoutModeUseCase
+import com.greenbee.findme.domain.usecase.RestoreFavoriteUseCase
 import com.greenbee.findme.domain.usecase.SetShelterLayoutModeUseCase
+import com.greenbee.findme.domain.usecase.ToggleFavoriteUseCase
+import com.greenbee.findme.presentation.home.HomeFavoriteSnackbar
 import com.greenbee.findme.presentation.home.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -21,8 +27,11 @@ import kotlinx.coroutines.launch
 class ShelterAnimalsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observeShelterLayoutModeUseCase: ObserveShelterLayoutModeUseCase,
+    observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val setShelterLayoutModeUseCase: SetShelterLayoutModeUseCase,
     private val getAbandonedAnimalsUseCase: GetAbandonedAnimalsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val restoreFavoriteUseCase: RestoreFavoriteUseCase,
 ) : ViewModel() {
 
     private val careRegNo: String = savedStateHandle.get<String>("careRegNo").orEmpty()
@@ -35,6 +44,8 @@ class ShelterAnimalsViewModel @Inject constructor(
 
     private var currentPage = 1
     private var isRequestInFlight = false
+    private var rawFavorites: List<FavoriteAnimal> = emptyList()
+    private var pendingUndoFavorite: FavoriteAnimal? = null
 
     init {
         viewModelScope.launch {
@@ -42,7 +53,50 @@ class ShelterAnimalsViewModel @Inject constructor(
                 _uiState.update { it.copy(layoutMode = layoutMode) }
             }
         }
+        viewModelScope.launch {
+            observeFavoritesUseCase().collect { favorites ->
+                rawFavorites = favorites
+                _uiState.update {
+                    it.copy(favoriteDesertionNos = favorites.map { favorite -> favorite.desertionNo }.toSet())
+                }
+            }
+        }
         loadAnimals(reset = true)
+    }
+
+    fun toggleFavorite(desertionNo: String) {
+        viewModelScope.launch {
+            val favoriteBeforeRemove = rawFavorites.find { it.desertionNo == desertionNo }
+            runCatching { toggleFavoriteUseCase(desertionNo) }
+                .onSuccess { result ->
+                    pendingUndoFavorite = if (result == FavoriteToggleResult.REMOVED) {
+                        favoriteBeforeRemove
+                    } else {
+                        null
+                    }
+                    _uiState.update {
+                        it.copy(
+                            favoriteSnackbar = when (result) {
+                                FavoriteToggleResult.ADDED -> HomeFavoriteSnackbar.ADDED
+                                FavoriteToggleResult.REMOVED -> HomeFavoriteSnackbar.REMOVED
+                            },
+                        )
+                    }
+                }
+        }
+    }
+
+    fun undoRemoveFavorite() {
+        val favorite = pendingUndoFavorite ?: return
+        viewModelScope.launch {
+            restoreFavoriteUseCase(favorite)
+            onFavoriteSnackbarShown()
+        }
+    }
+
+    fun onFavoriteSnackbarShown() {
+        pendingUndoFavorite = null
+        _uiState.update { it.copy(favoriteSnackbar = null) }
     }
 
     fun retry() {

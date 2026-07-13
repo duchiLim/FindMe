@@ -38,7 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,14 +61,14 @@ fun HomeTodayRegisteredScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     LaunchedEffect(uiState.favoriteSnackbar) {
         when (uiState.favoriteSnackbar) {
             HomeFavoriteSnackbar.ADDED -> {
                 val result = snackbarHostState.showSnackbarWithAutoDismiss(
-                    message = context.getString(R.string.favorite_added_message),
-                    actionLabel = context.getString(R.string.favorite_view_list),
+                    message = resources.getString(R.string.favorite_added_message),
+                    actionLabel = resources.getString(R.string.favorite_view_list),
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     onNavigateToFavorite()
@@ -77,8 +77,8 @@ fun HomeTodayRegisteredScreen(
             }
             HomeFavoriteSnackbar.REMOVED -> {
                 val result = snackbarHostState.showSnackbarWithAutoDismiss(
-                    message = context.getString(R.string.favorite_removed_message),
-                    actionLabel = context.getString(R.string.favorite_undo),
+                    message = resources.getString(R.string.favorite_removed_message),
+                    actionLabel = resources.getString(R.string.favorite_undo),
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> viewModel.undoRemoveFavorite()

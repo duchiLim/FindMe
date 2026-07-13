@@ -1,6 +1,7 @@
 package com.greenbee.findme.presentation.shelter.animals
 
 import com.greenbee.findme.domain.model.HomeLayoutMode
+import com.greenbee.findme.presentation.home.HomeFavoriteSnackbar
 import com.greenbee.findme.presentation.home.model.AbandonedAnimalUiModel
 
 data class ShelterAnimalsUiState(
@@ -14,4 +15,6 @@ data class ShelterAnimalsUiState(
     val isEmpty: Boolean = false,
     val errorMessage: String? = null,
     val layoutMode: HomeLayoutMode = HomeLayoutMode.GRID,
+    val favoriteDesertionNos: Set<String> = emptySet(),
+    val favoriteSnackbar: HomeFavoriteSnackbar? = null,
 )
